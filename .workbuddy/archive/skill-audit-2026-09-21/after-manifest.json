@@ -1,0 +1,324 @@
+{
+  "stats": [
+    {
+      "skill": "zion-assets",
+      "before_files": 17,
+      "after_files": 17,
+      "before_instruction_chars": 42247,
+      "after_instruction_chars": 40461,
+      "manual_cases": 25
+    },
+    {
+      "skill": "zion-qa",
+      "before_files": 7,
+      "after_files": 6,
+      "before_instruction_chars": 9706,
+      "after_instruction_chars": 6495,
+      "manual_cases": 25
+    },
+    {
+      "skill": "zion-script",
+      "before_files": 12,
+      "after_files": 10,
+      "before_instruction_chars": 17343,
+      "after_instruction_chars": 11512,
+      "manual_cases": 23
+    },
+    {
+      "skill": "zion-storyboard",
+      "before_files": 25,
+      "after_files": 24,
+      "before_instruction_chars": 49997,
+      "after_instruction_chars": 50400,
+      "manual_cases": 52
+    }
+  ],
+  "installed_differences": [],
+  "manifest": [
+    {
+      "skill": "zion-assets",
+      "path": "SKILL.md",
+      "sha256": "e2a9b54c057bdcb33f59db2f9212222463a51ac714c11d8fe30b346e652dedd6"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "_user_meta.json",
+      "sha256": "6b2f91a0979d415709b144ca993d1f2ee17a2ba4b451fe040cacf7fb782d4584"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/14-asset-consistency.md",
+      "sha256": "05a9e28b83599d59357c8c7551deb990c7a299b3b8bbe9a9715ffd87ea02b592"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/18-image-engines.md",
+      "sha256": "5690c253c4a1941c0c6d448acf44338b16ac16eb298273dc10a6c97daa5b17df"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/19-genre-style-profiles.md",
+      "sha256": "905083b5596f64c2c595702cbcf5570a606760a1f2099b0ed582f2d22d22747d"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/asset-output-schema.md",
+      "sha256": "f1d5266578a2c17bda316ae88a90927102276535be068144a93cf78d8ec7954f"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/asset-prompt-builder.md",
+      "sha256": "b3a8d972aea502b6e8e701d31c12ec4719b58b9f94dad8801eb569620efda264"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/asset-registry-and-handoff.md",
+      "sha256": "94c0fd69a3c8e0bfdf46c0326f32cc3c49615c22e8f113a094177e766b32ba55"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/character-extraction-rules.md",
+      "sha256": "73601d18481f3129b61b7b91ca52d1205d39727a5526b814bf4b0549cea106d0"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/director-vision-language.md",
+      "sha256": "835b70e5300551964d9b7eb39df9100a098b7d38335f2dd569902b07db70e526"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/film-and-print-stocks.md",
+      "sha256": "c4492dd4a205405f917fae8d58d006da33dccc8e015ec3e6dd0e33d201c7a888"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/json-schema.md",
+      "sha256": "79c92c5c3c95513f53a23409052f4fbe6139b235d1ee0b9e4cab57883f78f4ea"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "references/reference-sheet-templates.md",
+      "sha256": "2be401b6cb0b37773cae36a425294b18b3dec739af049147fb6d9f01ccac931a"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "scripts/extract_characters.py",
+      "sha256": "52e1953af0e4c2950c7d47f197a8dc8af7ae3fdd920ae76d028b07182a2d477a"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "scripts/parse_input.py",
+      "sha256": "fef9d91518d344b8bf860a0ae3b3975c190706e7207304e42b1cc765bebec0a1"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "tests/manual-regression.md",
+      "sha256": "4599ce168210b5be60500e03cbb10d79d6b3809b7e58b727de2e1c05992860b0"
+    },
+    {
+      "skill": "zion-assets",
+      "path": "tests/test_extract_characters.py",
+      "sha256": "070979e4950d875cb31c72ed57ec4ccec1a89e8eb66c0bc5220aef559e44252e"
+    },
+    {
+      "skill": "zion-qa",
+      "path": "SKILL.md",
+      "sha256": "804adb818e9cc0f8faf352032f320c0f1627a8b9fd1371bd62eadeb988300c52"
+    },
+    {
+      "skill": "zion-qa",
+      "path": "_user_meta.json",
+      "sha256": "6765d0e9cd56a525c05d22003bcaa479cd5779adb443d178d32cdaff2965683c"
+    },
+    {
+      "skill": "zion-qa",
+      "path": "references/qa-blind-read.md",
+      "sha256": "51ffdfc275e82e137b4dfb5d00806ab42fc6297988307a3138a37e05bd9bad2e"
+    },
+    {
+      "skill": "zion-qa",
+      "path": "references/qa-feedability.md",
+      "sha256": "74d8730e3f8a08845e58d7f85f31db6fec3766e370e778debdd5a40880a83296"
+    },
+    {
+      "skill": "zion-qa",
+      "path": "references/qa-result-acceptance.md",
+      "sha256": "0202a2d29e2c86a40c1ff90c7507b09099654f63ec86f69f70cbb2ca33f31eb5"
+    },
+    {
+      "skill": "zion-qa",
+      "path": "tests/manual-regression.md",
+      "sha256": "7515ef5286c09a00dc71accd6789f9b68e98fafba174060d4ff3eb4221228c16"
+    },
+    {
+      "skill": "zion-script",
+      "path": "SKILL.md",
+      "sha256": "48ad875d9cdc050429ee405edae06d2ab630bdeebe7964df8a8dfc0a8b66d26c"
+    },
+    {
+      "skill": "zion-script",
+      "path": "_user_meta.json",
+      "sha256": "0c473ec60437644afa64c640a53e09f927dd6d8420c79653d18534dc41fe7f69"
+    },
+    {
+      "skill": "zion-script",
+      "path": "references/03-story-requirements.md",
+      "sha256": "d3518bb508ba54b4026835240e172228e63cbe45a493f434499041b98f555588"
+    },
+    {
+      "skill": "zion-script",
+      "path": "references/06-shotlist-format.md",
+      "sha256": "e42e9e87730b424815744270c5f9388aa2119421832736e22dae5d7d7f9720de"
+    },
+    {
+      "skill": "zion-script",
+      "path": "references/08-continuity-and-report.md",
+      "sha256": "6b15c1e70d32e53365e0bc45f8554a2d76bece7f4416b679c47af3c555e6044d"
+    },
+    {
+      "skill": "zion-script",
+      "path": "references/10-physical-acting.md",
+      "sha256": "866ea8f4a056fd1dc69932fa79f3991e3e7bf50b01e8430d4236c0947e937121"
+    },
+    {
+      "skill": "zion-script",
+      "path": "references/11-character-and-worldbuilding.md",
+      "sha256": "f08eb621335ce572b0623bc82bd6ce4c63be793c61b84faa7bd2afdcb8b1d157"
+    },
+    {
+      "skill": "zion-script",
+      "path": "references/12-visual-style-and-grading.md",
+      "sha256": "3cf979eede69bfab9e75c25fc4903b0eca635fd5aa4409cacd3ebd74ee9d3232"
+    },
+    {
+      "skill": "zion-script",
+      "path": "references/facs-reference.md",
+      "sha256": "00b919e1a2716c7be6f3933b57009e8e7d068e46adeae19da5416775a8264839"
+    },
+    {
+      "skill": "zion-script",
+      "path": "tests/manual-regression.md",
+      "sha256": "3df3cc5e345159d97ccafd503af74188da41f34630baae8e756f0e5015d5bd59"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "SKILL.md",
+      "sha256": "a9c5bee3b0d9d790e4e5f308676af7719ed86b5a272ebbda5fa630144122fdec"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "_user_meta.json",
+      "sha256": "b00d9988742ac7966f35dca3ec7383967d56b6a309a3faa974ba500ed22a319c"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/10-engine-constraints.md",
+      "sha256": "824454c321835a6f1524c2daaa475ee9a04071000bacb25e0596edaa157c88fe"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/11-failure-modes.md",
+      "sha256": "8b20941c83ce4ab50e50ae9d30cea1f01a953ef1a21d5a25b95e173d905b40ef"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/12-prompt-hygiene.md",
+      "sha256": "06cd1823d6161446d3826dcf5d69080543ce8bab4e5a1f48f5a05fe746c26866"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/13-camera-and-texture.md",
+      "sha256": "bbaba0b7c92168d7cfa9b3e130c97742480abfbada9efcf0bcad628bd2e6e689"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/15-audio-and-lipsync.md",
+      "sha256": "8f82bbaf20b14dce0324bcb0ecde6f5ac591b1ce81e430ef13d5b57e40743063"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/17-stage5-checklist.md",
+      "sha256": "670c4f7f5c83c3a5f559447f27bb56d4d927012987b7a7421a8a78a64b583cf9"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/20-lighting-system.md",
+      "sha256": "7d72cca7a1781d817b7a64326a58dfaf3862a034d17fd04d358e6d8dd2a4b0a2"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/21-relationship-composition.md",
+      "sha256": "dfb530f2247fdb0f3e67825c7e6801ee5a736bb303a6cbb128d783cd8470b291"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/22-editing-and-transitions.md",
+      "sha256": "1257936fd9df13f60f0bc6dce8b03aaacb0038028d15d545945c5f8706a0d804"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/action-choreography-rules.md",
+      "sha256": "e29efa5e1b1bdb6dd4fdee27ee79657b07c2b18d5344972eed3affd468c65dad"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/aspect-ratio-directing.md",
+      "sha256": "1356ce889243a3312b2a47acb0d30b60a0c4f39181d9b717f5f0604a30d37860"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/camera-vocabulary.md",
+      "sha256": "853bc56c7d7b5e1d43a080dcaa883a919a16846dda40a3e77fe89f7982963fa9"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/directing-policy.md",
+      "sha256": "c003143be11700c9c64e6412320b9956c53c6a7d63b9c9b55a6c0a325f4457f4"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/output-schema.md",
+      "sha256": "c3eb5a09132f6476429532329d994dc5ad7e3f2e3561c0394664da3b8783e063"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/script-fidelity-gates.md",
+      "sha256": "3e5b13976fc4f1e11f6494adf0e52faa1c02e0d266024a3ea01ab5bc2d4455f5"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/seedance-prompt-renderer.md",
+      "sha256": "d614ef022fa1abcb7cec7a4c55cbef235dbc3c7b055618bf437da00d8cb1c657"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "references/visual-storytelling.md",
+      "sha256": "3ebf0e6f94bb7b08a01192ec0042b447e333f5da5683edca7d8453956112e3e2"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "scripts/export_output.py",
+      "sha256": "8085405620548c50d30083e17a658fc1db34821d48f8692cdddc4d2edc8c395c"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "scripts/parse_input.py",
+      "sha256": "fef9d91518d344b8bf860a0ae3b3975c190706e7207304e42b1cc765bebec0a1"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "scripts/storyboard_audit.py",
+      "sha256": "00f84c210e3fbb786d4610f762dfc8a753f434edb0c3d41aeba5163b5d9546fa"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "tests/manual-regression.md",
+      "sha256": "a385920ea7c09dc50b656e1ad25dc40d73445ce6dd006d15827ca46c71e8dbf3"
+    },
+    {
+      "skill": "zion-storyboard",
+      "path": "tests/test_storyboard_audit.py",
+      "sha256": "8b5f1a07affd12ea7f7402cb237d556d3a0c14d27532f564ddcbb40c09fc7cf7"
+    }
+  ]
+}

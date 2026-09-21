@@ -1,0 +1,96 @@
+# 当前分镜输出契约
+
+以下为当前字段规则，保留旧导出器需要的字段名；配额、焦段映射和数据自带的 passed 值不作为默认验收依据。
+
+默认 Markdown 顺序：参数和补充范围 → 场景/资产简表 → 逐镜导演分镜 → 分组生成提示词。
+
+每镜写：时间、拍法、画面过程、必要物理反馈、声音/对白、切点与连续状态。画面中确实无物理互动时不硬填。
+
+JSON 保留旧字段，新增/明确以下可选字段：
+
+| 字段 | 用途 |
+|---|---|
+| meta.handoff_schema_version | 跨 Skill 交接契约版本；新项目使用 `1.0` |
+| meta.project_id | 继承剧本的稳定项目 ID |
+| meta.source_script_version | 本分镜所依据的剧本版本 |
+| meta.source_scene_ids | 本生成组覆盖的稳定场次 ID 列表 |
+| meta.target_model | 目标视频模型与版本；用户未指定时填默认 `Seedance 2.5`。只做导演分镜时可为空 |
+| meta.image_engine | 旧数据兼容字段；新分镜不负责选择图像引擎，资产图像引擎记录在 `zion-assets` 交接包中 |
+| meta.pacing_profile | narrative（默认）/ high_energy / legacy_quota |
+| meta.generation_limit_seconds | 包含生成提示词时，填用户确认的本次生成预算；未知时先询问，不设通用缺省值。纯导演稿可空 |
+| shots[].shot_function | 镜头带来的叙事作用 |
+| shots[].source_scene_id | 当前镜头回指的剧本场次 ID；必须存在于 `meta.source_scene_ids` |
+| shots[].asset_refs / character_refs / scene_refs / prop_refs | 当前镜头实际使用的资产引用；每项必须唯一命中 `meta.asset_mode` 中保留 ID、版本、状态和文件映射的交接项 |
+| shots[].pov_family | 观察关系，直接写名称：客观正面 / 过肩 / 正侧面 / 侧背 / 正背 / 主观视角 / 反射中介 / 前景遮挡 / 插入细节 / 弧线观察。不使用 V 编号，不在此字段写高/低角度 |
+| shots[].camera_height | 机位物理高度：贴地 / 略低 / 眼平 / 略高 / 高位 / 正上方等 |
+| shots[].camera_angle | 镜头朝向或滚转：平拍 / 仰拍 / 俯拍 / 鸟瞰 / 虫视 / 斜角（荷兰角）等；与高度分开记录 |
+| shots[].new_feedback | 可见变化、新信息或有意义的等待；每镜填写并人工评审 |
+| shots[].physical_feedback | 具体物理因果、反馈与末态；适用时填写 |
+| shots[].continuity_in / continuity_out | 位置、持物、动作阶段等入/出状态 |
+| shots[].cut_motivation | 切换观察对象的理由；单镜可写“持续观察” |
+| shots[].transition_out | 可选；写向下一镜的切换机制、触发时点及 A 末帧/B 首帧锚点。镜内揭示不填成跨镜转场；规则见 [剪辑与转场](22-editing-and-transitions.md) |
+| shots[].addition_note | 原文依据或导演补充说明，不进入生成块 |
+| shots[].camera_move_triplet | 主动运镜的 origin/direction/stop_result；固定可省略 |
+| shots[].internal_beats | 可选；一镜到底或复杂长镜头的内部时间阶段。阶段共享同一 `shot_number`，记录时间、主体/焦点、摄影机路径和新增信息，不作为独立切镜 |
+| shots[].generation_prompt | 目标模型的生成指令；纯导演稿可空。旧数据的 `seedance_prompt` 仍可读取 |
+
+物理反馈等新字段为兼容旧数据保持可选，不代表创作可忽略。需要时必须在画面正文和模型提示词里体现，不能只写在分析字段。
+
+时间允许小数秒。正反打是合法独立镜头，焦段与景别不按固定表对应。focal_length/aperture 在旧导出必填结构中可写“未指定”。
+
+详细分镜的新增字段与模型提示词分别导出，不把导演目的放入生成指令。variety_check 是诊断统计；不能由数据自带 passed=true 跳过重新检查。脚本结果不等于源文保真、物理合理性或实际生成验收。
+
+
+## JSON 最小完整样例
+
+以下是用户已确认使用 Seedance 2.5、9:16、单次 30 秒后的示例；不得把示例值当作未确认项目的默认值。
+
+```json
+{
+  "meta": {
+    "source": "script",
+    "source_file": "桌前停顿",
+    "handoff_schema_version": "1.0",
+    "project_id": "PRJ_desk_pause",
+    "source_script_version": "script_v1",
+    "source_scene_ids": ["SC001"],
+    "scene_type": "dialogue",
+    "total_duration_seconds": 6,
+    "generation_limit_seconds": 30,
+    "pacing_profile": "narrative",
+    "target_model": "Seedance 2.5",
+    "aspect_ratio": "9:16"
+  },
+  "shots": [{
+    "shot_number": 1,
+    "source_scene_id": "SC001",
+    "time_range": {"start": 0, "end": 6},
+    "duration_seconds": 6,
+    "framing": "双人中景",
+    "camera_height": "眼平",
+    "camera_angle": "平拍",
+    "pov_family": "正侧面",
+    "composition": "桌沿引导视线，手和文件清楚可见",
+    "camera_movement": "固定",
+    "focal_length": "未指定",
+    "aperture": "未指定",
+    "description": "周衡把文件推回林岚面前，林岚收回停在桌面的手。纸张停住后，两人隔桌静默。",
+    "physical_feedback": "纸张沿桌面滑移，施力结束后因摩擦停住；摩擦声随滑移停止。",
+    "shot_function": "让拒绝通过文件归还和未接取显现",
+    "new_feedback": "文件回到林岚面前，林岚没有再次递出",
+    "continuity_out": "文件停在桌面，双方手均不接触纸张",
+    "cut_motivation": "持续观察拒绝落定后的关系",
+    "dialogue": "",
+    "generation_prompt": "镜头1（0–6秒）：桌侧双人中景，平视固定，手和文件保持清晰。周衡沿桌面将文件推回林岚面前，林岚收回停在桌面的手；纸张滑移后停住，摩擦声停止，两人保持静默。"
+  }],
+  "space_layout": "林岚在桌左，周衡在桌右，摄影机位于两人连线的桌前一侧",
+  "ending_state": "文件停在林岚面前，双方没有触碰文件",
+  "constraints": "保留纸张摩擦声及室内底噪，无新增台词、配乐或字幕"
+}
+```
+
+一个对象表示一个生成组。多组使用列表，每组独立 meta、时间从零计、完整上下文和末态；批量包装沿用 `results[].data`。整片绝对时间可另记，不能混入组内时间码。
+
+如提供 `fidelity_gate.dialogue_capacity.total_min_seconds`，值为本组实际时间规划占用，并在导演稿说明并行/串行安排。不提供时脚本只做保守估计。新数据不能伪填容量零值以绕过对白规划。
+
+物理反馈在详细稿中可分栏解释，在生成提示词中要回写为实际可见过程。source/addition_note 不自动进入模型提示词。

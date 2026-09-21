@@ -1,0 +1,46 @@
+# Workspace runtime state (not distributable)
+.workbuddy/locks/
+.workbuddy/state/
+
+# Independent nested repository
+/codex-skills/
+
+# Python caches and local tooling output
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local environments and secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Editor and operating-system files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary and log files
+*.log
+*.tmp
+*.temp
+*.bak
+
