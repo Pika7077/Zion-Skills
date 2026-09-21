@@ -129,6 +129,13 @@ lint 只查 Markdown 链接、标题锚点与 `§x` 引用，**不查「八种�
 
 高价值可迁移项通常长这样：一个能一句话说清的判据（“麦克风能录到的进语气位，摄像机拍得到的进画面段”／“每个词都能画出来吗”），而不是一串数值。
 
+## Git 与换行符（2026-09-21 建立）
+
+- 工作区是 Git 仓库（`main` 分支，**纯本地无远端**）；**收工最后一步提交**，见 `AGENTS.md` 标准循环第 11 步。提交信息写清技能、改动与版本号。
+- `.gitignore` 忽略 `.workbuddy/locks`、`.workbuddy/state`（运行时状态）与 `/codex-skills/`（独立嵌套仓库）。`archive/`、`memory/`、`tools/` 入库。
+- **换行符一律 LF**：`.gitattributes` 配 `eol=lf`，`core.autocrlf=false`（不做自动转换）。**Windows 上的写入工具可能默认落 CRLF**——新写或改写文件后要核对；混合换行会让 git 在 checkout 时改写文件，并可能触发 `skill_guard.py check` 的假漂移告警。
+- 里程碑：`539f4b7` 基线（v3.14.0，160 文件）；`1c9afa6` 规程加入 Git 步骤与换行符纪律（含 15 个文件的 CRLF→LF 转换）。
+
 ## 目录约定
 
 - 工作区为唯一源：`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa` + `Zion技能使用手册.md`。
