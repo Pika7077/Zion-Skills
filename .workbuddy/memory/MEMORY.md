@@ -134,7 +134,10 @@ lint 只查 Markdown 链接、标题锚点与 `§x` 引用，**不查「八种�
 - 工作区是 Git 仓库（`main` 分支，**纯本地无远端**）；**收工最后一步提交**，见 `AGENTS.md` 标准循环第 11 步。提交信息写清技能、改动与版本号。
 - `.gitignore` 忽略 `.workbuddy/locks`、`.workbuddy/state`（运行时状态）与 `/codex-skills/`（独立嵌套仓库）。`archive/`、`memory/`、`tools/` 入库。
 - **换行符一律 LF**：`.gitattributes` 配 `eol=lf`，`core.autocrlf=false`（不做自动转换）。**Windows 上的写入工具可能默认落 CRLF**——新写或改写文件后要核对；混合换行会让 git 在 checkout 时改写文件，并可能触发 `skill_guard.py check` 的假漂移告警。
-- 里程碑：`539f4b7` 基线（v3.14.0，160 文件）；`1c9afa6` 规程加入 Git 步骤与换行符纪律（含 15 个文件的 CRLF→LF 转换）。
+- 里程碑：`539f4b7` 基线（v3.14.0，160 文件）；`1c9afa6` 规程加入 Git 步骤与换行符纪律（含 15 个文件的 CRLF→LF 转换）；`411ca60` 收尾记录。
+- **shell 里 `git` 不在默认 PATH**：报 `git: command not found` 时先加
+  `export PATH="/c/Users/Zhang/.workbuddy/binaries/PortableGit/versions/1.2.0/mingw64/bin:$PATH"`
+  注意是 `mingw64/bin`，不是 `bin`（`bin` 下没有 git.exe）。
 
 ## 目录约定
 
