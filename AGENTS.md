@@ -13,6 +13,7 @@
 | 归档 | `.workbuddy/archive/` |
 | 手册 | `Zion技能使用手册.md` |
 | 版本与变更记录 | `CHANGELOG.md` |
+| Git 仓库 | 工作区根目录，`main` 分支，纯本地无远端；`.workbuddy/locks`、`.workbuddy/state` 与嵌套仓库 `codex-skills/` 不入库 |
 | 长期约定与单一来源地图 | `.workbuddy/memory/MEMORY.md` |
 
 ## Git 跟踪边界
@@ -34,10 +35,14 @@
    python -B zion-storyboard/tests/test_storyboard_audit.py    # 必须全绿
 7  python .workbuddy/tools/skill_guard.py check                # 看这段时间有没有别人也在写
 8  python .workbuddy/tools/sync_skills.py --target <codex|workbuddy>
-9  python .workbuddy/tools/skill_guard.py release <skill> --owner <会话名>
+9  更新 CHANGELOG.md 的版本号与条目
+10 python .workbuddy/tools/skill_guard.py release <skill> --owner <会话名>
+11 git add -A && git commit -m "<技能>: <改了什么>（vX.Y.Z）"
 ```
 
 对照各技能 `tests/manual-regression.md` 人工复核，是同一步收工动作的一部分。
+
+第 11 步的提交是收工的最后一环：**一次逻辑改动一次提交**，提交信息写清技能、改动与版本号（版本号见 `CHANGELOG.md`）。
 
 ## 硬规则
 
@@ -52,6 +57,9 @@
 - **正文 `§x` 章节引用要么写「本档 §x」，要么在 `§x` 前 60 字符内写出被引档名**；同句先提了别的档再写 `见 §x` 会被 `SECTION_REF` 判为跨档引用。
 - 发现文件数目、行数或时间戳与预期不符时**停下来核对**，不默认是自己的改动。
 - 技能改动只在工作区做；`.workbuddy/state`、`.workbuddy/locks` 不随技能分发。
+- **换行符一律 LF**：仓库由 `.gitattributes` 统一 `eol=lf`。Windows 上的写入工具可能默认落 CRLF，新写或改写文件后要确认是 LF。混合换行会让 git 在 checkout 时改写文件，并可能触发 `skill_guard.py check` 的假漂移告警。
+  - 自查：`git ls-files -z | xargs -0 file | grep CRLF`（或按扩展名逐类抽查），发现即转换。
+- **提交只含自己的改动范围**：发现工作区有对方未提交的改动时先说明再决定，不把对方的半成品一起提交。提交前确保 lint 为 0、回归全绿、CHANGELOG 已更新。
 
 ## 清理纪律
 
