@@ -40,6 +40,9 @@ def walk(base):
 
 
 def main():
+    if "--help" in sys.argv or "-h" in sys.argv:
+        print(__doc__)
+        return 0
     dry = "--dry" in sys.argv
     which = ["codex", "workbuddy"]
     for i, a in enumerate(sys.argv):

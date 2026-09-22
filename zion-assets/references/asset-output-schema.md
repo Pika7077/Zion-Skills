@@ -29,7 +29,7 @@
 | `source_extraction_ids` | 可选；经证据核对映射到本资产的人物提取记录键，不以姓名自动关联 |
 | `evidence_level` | explicit / inferred / designed / unknown |
 | `stable_anchors` | 不随镜头变化的身份、结构、材质或声音特征 |
-| `scene_consistency` | 可选；仅场景资产使用。含 `power_mechanism`（谁控制入口/座位/桌/门）、`vertical_lane`（前景压迫物／中央通道／背景锚点／门槛轴／交接区）、`view_set`（已制作观察方向及所属时间/天气状态）、`light_source_shared`（同组 View 共用主光与色温关系）、`state_ladder`（已用 S 状态与可见证据）、`protected_anchors` / `allowed_changes` / `forbidden_drift`、`narrative_objects`、`empty_stage`、`readiness`、`before_after`。字段定义见 [场景一致性与状态阶梯](26-scene-consistency.md) |
+| `scene_consistency` | 可选；仅场景资产使用。含 `power_mechanism`（谁控制入口/座位/桌/门）、`vertical_lane`（前景压迫物／中央通道／背景锚点／门槛轴／交接区）、`clearance`（净空与体量：头顶净空／身体余量／可退距离／比例参照）、`view_set`（已制作观察方向及所属时间/天气状态）、`light_source_shared`（同组 View 共用主光与色温关系）、`state_ladder`（已用 S 状态与可见证据）、`protected_anchors` / `allowed_changes` / `forbidden_drift`、`narrative_objects`、`empty_stage`、`readiness`、`before_after`。字段定义见 [场景一致性与状态阶梯](26-scene-consistency.md) |
 | `state_variant` | 默认、换装、损伤、破损、开合、天气/时间等状态 |
 | `version` | 当前版本及父版本 |
 | `status` | identified / designed / candidate / approved / uploaded / deprecated；状态定义与准入见 [资产登记与交接](asset-registry-and-handoff.md) |

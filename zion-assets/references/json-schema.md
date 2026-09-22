@@ -108,6 +108,7 @@
     "visual_symbol": "左手腕的疤痕——母亲去世那年留下的",
     "color_scheme": "冷色调为主，白色+深蓝+灰色，少量酒红点缀",
     "posture": "坐姿挺直但肩部微含，习惯性自我保护的体态",
+    "gait": "步幅偏小、落步轻，走路时重心微前倾，双手习惯插兜",
     "aura_keywords": ["清冷", "克制", "孤独", "坚韧"]
   },
   "evidence_levels": {
@@ -199,7 +200,8 @@
 |------|------|------|
 | visual_symbol | string | 视觉符号及来源故事 |
 | color_scheme | string | 配色倾向 |
-| posture | string | 体态习惯 |
+| posture | string | 体态习惯（静态站坐姿态） |
+| gait | string | 行走特征：步幅、节奏、重心与习惯动作。**背影、远景或隐藏型人物靠它被认出**；不露脸镜头较多的角色应写明，材料不足时按"未知"保留 |
 | aura_keywords | string[] | 3-5个气质关键词 |
 
 ### evidence_levels 对象

@@ -1,6 +1,6 @@
 # 剧本创作中的镜头稿
 
-本参考只在用户明确要求 zion-script 附带简版镜头构想时读取。已有剧本的制作级分镜由 `zion-storyboard` 完成。
+本参考只在用户明确要求 zion-script 附带简版镜头构想时读取。已有剧本的制作级分镜由 `zion-storyboard` 完成。剧本正文本身的写法与格式见 [剧本正文](17-script-page-and-format.md)，两种交付不混装。
 
 ## 字段选择
 
