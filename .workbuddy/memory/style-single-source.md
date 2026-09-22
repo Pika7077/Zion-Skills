@@ -10,6 +10,9 @@
 |---|---|
 | 画面内容设计：场次构建与切镜、与剧情有关的画面层次、**用空间与视角承载情绪（情绪→空间→视角的顺序、空间的物理事实三类、视角随心态走线、三层压力叠加、隐藏感替代表演）**、对白转场面调度、物理反馈 | `zion-storyboard/references/visual-storytelling.md` |
 | 题材美术（形制／材质／器物／色板／锁定项） | `zion-assets/references/19-genre-style-profiles.md` |
+| 资产跨镜一致性：身份与外观锁定、漂移治理、参考图分层 | `zion-assets/references/14-asset-consistency.md` |
+| 资产提示词构建：尺度链、分层、模板选择 | `zion-assets/references/asset-prompt-builder.md` |
+| 图像引擎候选与规格（默认 GPT Image 2；Midjourney 仅在显式要求时启用） | `zion-assets/references/18-image-engines.md` |
 | 场景一致性：地理／竖屏动线／S0–S5 状态阶梯／跨观察方向光线对齐／空场政策／环境叙事分层／视频可用性预检／取舍顺序与三项核心质感／俯视空间位置图 | `zion-assets/references/26-scene-consistency.md` |
 | 视觉语言（构图／镜头／调度／光色气质，含影人拆解） | `zion-assets/references/director-vision-language.md` |
 | 成像响应（胶片颗粒／宽容度／印片黑位与色彩密度） | `zion-assets/references/film-and-print-stocks.md` |
@@ -17,6 +20,10 @@
 | 外部素材来源、权利状态与允许用途登记（只追踪证据，不作法律结论） | `zion-assets/references/source-and-rights.md` |
 | 数字机身、焦段透视逻辑、镜头与光圈、调色词库与八种调色预设、可选 60:30:10 配色、风格锚点、Anti-Slop 替换表、Register Poles | `zion-storyboard/references/13-camera-and-texture.md` §二／§六 |
 | 镜头语言：景别与观看位置、建立镜的空间任务、深焦/选择性焦点、短长镜头、具名运镜的可执行路径 | `zion-storyboard/references/camera-vocabulary.md` |
+| 导演决策标准：镜头目的先于拍法、不使用的绝对规则（景别/角度/运镜/特写没有默认配额） | `zion-storyboard/references/directing-policy.md` |
+| 关系构图：七个可控要素、关系→取景语法、站位与画面分区、视线、人物与场景构成 | `zion-storyboard/references/21-relationship-composition.md` |
+| 画幅导演：竖屏/横屏适配与既有构图的画幅重构 | `zion-storyboard/references/aspect-ratio-directing.md` |
+| 生成失败诊断：失败模式定位与修复路径 | `zion-storyboard/references/11-failure-modes.md` |
 | 色系（九种）、影调档（明度×饱和七色调）、场景与剧情的色调一致性、共同色偏、全片影调弧线、色彩叙事推进 | `zion-storyboard/references/23-color-and-tone.md` |
 | 色彩的结构功能：含义由作品自己建立（不套色义表）、互补色对只留一对、一色一义、色彩脚本、服装色彩、前后期分工、**配色情绪换向（面积主次与归属／明暗与饱和深浅／光源来源三变量；邻近色与单色主导的方向靠光质与影调）** | `zion-storyboard/references/36-color-as-structure.md` |
 | 视觉母题三类与母题表、复现四手法 | `zion-storyboard/references/24-visual-motifs.md` |
@@ -41,6 +48,8 @@
 | 可选视频模型 MiniMax H3（字段集、时长、素材上限、映射与边界） | `zion-storyboard/references/16-minimax-h3-adapter.md` |
 | 动作强度分档 R1/R2/R3 | `zion-storyboard/references/action-choreography-rules.md` |
 | 张力分布检查（波峰波谷，不用分值模型）／冲突的构造（四要素、去台词检验、升级、立场、空间参与） | `zion-script/references/03-story-requirements.md` |
+| 剧本阶段的视觉事实锁定：风格与色彩在剧本层只定事实、不写制作参数 | `zion-script/references/12-visual-style-and-grading.md` |
+| 面部动作编码（FACS）与表情分解参考 | `zion-script/references/facs-reference.md` |
 | 表情强度三档、起—hold—落时序、遮挡改写与单侧指定 | `zion-script/references/10-physical-acting.md` §八 |
 | Style Sheet（按需视觉维度与精确色板）与 Forbidden List | `zion-script/references/11-character-and-worldbuilding.md` §四 |
 | 对白设计与诊断：语言指纹、潜台词、推进力、信息效率、节奏、记忆点 | `zion-script/references/04-dialogue-design.md` |
@@ -73,5 +82,14 @@
 | 无障碍与交付的**前期设计** | `zion-storyboard`（38 号档）；**成片判定**归 `zion-qa` |
 
 两侧的 S 状态编号必须指向同一状态定义。
+
+### 不在地图内的档（2026-09-22 审验确认）
+
+以下档是**流程契约、输出格式、检查表与工具类**，不承担内容归属，因此不登记上表——审验时看到它们"未登记"不是遗漏：
+
+- `zion-script`：`06-shotlist-format`、`08-continuity-and-report`
+- `zion-assets`：`asset-output-schema`、`asset-registry-and-handoff`、`character-extraction-rules`、`json-schema`、`reference-sheet-templates`
+- `zion-storyboard`：`17-stage5-checklist`、`output-schema`、`script-fidelity-gates`、`seedance-prompt-renderer`
+- `zion-qa`：`qa-blind-read`、`qa-feedability`、`qa-result-acceptance`
 
 已删除且不再恢复：`zion-script/references/05-scene-and-color-bible.md`、`07-prompt-spec.md`。

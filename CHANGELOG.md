@@ -1,8 +1,19 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v4.12.0`** · 2026-09-22
+**当前版本：`v4.13.0`** · 2026-09-22
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
+
+## v4.13.0 · 2026-09-22 — 全文件审验与版本号同步
+
+审验范围：四个技能 83 个文件 + 本文件 + 手册 + 记忆档。**校验全绿、规模与版本号一致，并修掉三处实病**。
+
+- **校验**：`skill_lint.py --meta` → files=83 problems=0（JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS／META 均空）；脚本回归 31 项全绿（assets 5 + storyboard 26）。`parse_input.py` 双份内容一致（DECLARED_DUPES 通过）。
+- **版本号与规模一致**：CHANGELOG「当前版本」与规模表与实测逐项对齐——script 12 参考档 / 71 回归、assets 14 / 49、storyboard 33 / 300、qa 5 / 48；四份回归编号连续无跳号；技能文件内**无版本号**（符合"版本号不写进技能文件"）。
+- **修复一（真断链）**：`zion-storyboard/references/10-engine-constraints.md`（模型适配／生成粒度）**没有 SKILL.md 直链**，只能从 17 号档间接到达；它是生成分组的核心判据，已在 §4「配平时长与生成组」补直链。修后四技能 SKILL.md 直链覆盖为 12/12、14/14、33/33、5/5。
+- **修复二（记录失真）**：v4.0.0 条目曾写"四技能 `quick_validate.py`、LF 与 diff 检查全绿"，而该脚本**在工作区从未存在**（已核对全部 git 历史）——就地更正为实际执行的两组自动回归，并标注更正出处。
+- **修复三（地图不完整）**：单一来源地图漏登记 9 份内容档（`21-relationship-composition`／`aspect-ratio-directing`／`11-failure-modes`／`directing-policy`／`12-visual-style-and-grading`／`facs-reference`／`14-asset-consistency`／`asset-prompt-builder`／`18-image-engines`），已补；并列出**不在地图内的契约与工具档**清单，使"未登记"不再需要每次人工判断是不是遗漏。
+- 未改动技能判据与回归用例本体；本期规模不变（33 档 / 300 用例）。
 
 ## v4.12.0 · 2026-09-22 — 两种等待与环境预示
 
@@ -169,7 +180,7 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 精简口径：新增细节全部放在条件式参考档；四份 `SKILL.md` 只保留触发路由和关键质量标准。来源与权利的唯一事实登记归 `zion-assets`，`zion-qa` 只检查证据完整性；无障碍与交付的前期设计归 `zion-storyboard`，真实成片判定归 `zion-qa`。
 
-规模：`zion-script` 12 参考档 / 66 回归；`zion-assets` 14 / 49；`zion-storyboard` 33 / 211；`zion-qa` 5 / 48。`skill_lint.py`、两组自动回归、四技能 `quick_validate.py`、LF 与 diff 检查全绿。
+规模：`zion-script` 12 参考档 / 66 回归；`zion-assets` 14 / 49；`zion-storyboard` 33 / 211；`zion-qa` 5 / 48。`skill_lint.py`、两组自动回归（assets 5 项 + storyboard 26 项）、LF 与 diff 检查全绿。（原文曾写"四技能 `quick_validate.py`"——工作区从未存在该脚本，2026-09-22 审验时更正，见 `v4.13.0`。）
 
 ## v3 系列速览（2026-09-21）
 
@@ -210,7 +221,7 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有新增档或结构调整（有 → 第一位）；再看这次是不是"多个小改动同时"（是 → 第二位）；其余都动第三位。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v4.12.0`，2026-09-22）
+## 当前规模（`v4.13.0`，2026-09-22）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
@@ -219,7 +230,7 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 | `zion-storyboard` | 33 | 300 |
 | `zion-qa` | 5 | 48 |
 
-校验状态：`skill_lint.py` → files=83 problems=0（无 ORPHAN／DANGLING／SECTION_REF／CROSS）；脚本回归 31 项全绿（assets 5 + storyboard 26）。
+校验状态（2026-09-22 全文件审验）：`skill_lint.py --meta` → files=83 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS／META）；脚本回归 31 项全绿（assets 5 + storyboard 26）；四技能 SKILL.md 对本技能参考档直链覆盖 12/12、14/14、33/33、5/5；回归编号连续；技能文件内无版本号。
 
 ## 变更记录
 
