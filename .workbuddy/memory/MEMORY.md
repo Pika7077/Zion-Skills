@@ -94,9 +94,10 @@ lint 只查 Markdown 链接、标题锚点与 `§x` 引用，**不查「八种�
 ## Git 与换行符（2026-09-21 建立）
 
 - 工作区是 Git 仓库（`main` 分支）；**收工最后一步提交**（`AGENTS.md` 标准循环第 11 步），提交信息写清技能、改动与版本号。
-- 远端 Gitee `origin`（HTTPS）。推送需 `env -u https_proxy -u http_proxy -u HTTPS_PROXY -u HTTP_PROXY`（沙箱注入的代理会中断传输），仓库级 `http.version HTTP/1.1`；用户名填 **Gitee 用户名**而非邮箱，密码用私人令牌。凭据走系统凭据管理器，非交互环境加 `GIT_TERMINAL_PROMPT=0` 防挂起。
-- **推送后的确认用本地命令**（`git status -sb` / `git log --oneline`）**，不要用 `git ls-remote`**——它对私有仓库每次都要重新走一遍凭据链（`credential.helper=helper-selector` → GCM），是本机反复出现 credential helper 活动的主因。push 自身的输出已含 `旧..新 branch -> branch`，足够判断结果。
-- `git branch -vv` 报 `origin/main: gone` **只是本地 remote-tracking 引用过期**，不代表远端被删；`git ls-remote` 才能确认真实远端状态。
+- 远端 Gitee `origin`（HTTPS）。推送需 `env -u https_proxy -u http_proxy -u HTTPS_PROXY -u HTTP_PROXY`（沙箱注入的代理会中断传输），仓库级 `http.version HTTP/1.1`；用户名填 **Gitee 用户名**而非邮箱，密码用私人令牌。非交互环境加 `GIT_TERMINAL_PROMPT=0` 防挂起。
+- **推送必须加 `GIT_CONFIG_NOSYSTEM=1`**（2026-09-22 实测；写这条前连着失败三次）。PortableGit 的**系统级** `etc/gitconfig` 设了 `credential.helper=helper-selector`，它每次认证要跑约 **40 秒**——内部连做 `git config helperselector.selected`、`--show-origin credential.helper`、`--system -e` 数次查询，中间约 36 秒无动作，常在真正传输前就被超时杀掉，表现为 **push 无输出挂死**（`git push -v` 停在 `Pushing to ...`）。加 `GIT_CONFIG_NOSYSTEM=1` 忽略系统配置后直接走 global 的 GCM，秒成。**这也是本机反复出现 credential helper 活动的原因**（`GIT_TRACE=1` 可直接看到那一串 `git config` 调用）。
+- **推送后的确认用本地命令**（`git status -sb` / `git log --oneline`），不要用 `git ls-remote`——它对私有仓库每次都要重新走一遍上面的凭据链。push 自身的输出已含 `旧..新 branch -> branch`，足够判断结果。
+- `git branch -vv` 报 `origin/main: gone` **只是本地 remote-tracking 引用过期**，不代表远端被删。
 - **换行符一律 LF**：`.gitattributes` 配 `eol=lf`，`core.autocrlf=false`。Windows 写入工具可能默认落 CRLF——新写或改写文件后要核对；混合换行会触发 `skill_guard.py check` 的假漂移告警。
 - `.gitignore` 忽略 `.workbuddy/locks`、`.workbuddy/state` 与嵌套仓库 `/codex-skills/`。
 - **shell 里 `git` 与 coreutils 都不在默认 PATH**（shim 的 `shell-runtime-bash-env.sh` 在 `dirname` 处失败）。每个 Bash 调用需自带：
