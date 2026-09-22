@@ -39,8 +39,12 @@
 | `dependencies` | 相关人物、场景、道具、服装、声音或镜头 |
 | `constraints` | 不可修改项、使用边界和未知项 |
 | `image_prompt` | 需要时提供的目标引擎提示词；不等同于已生成文件 |
+| `source_provenance` | 外部或用户素材的来源、提供者、链接或项目登记位置；未知时明确记录 |
+| `rights_status` | confirmed / user-asserted / pending / restricted / unknown；与制作状态分开 |
+| `permitted_uses` / `rights_restrictions` | 已明确允许的参考、编辑、生成、发布等用途及限制，不自行补全 |
+| `identity_consent` / `attribution` | 涉及可识别人物、声音或需署名素材时按实际证据记录 |
 
-人物的详细语义字段继续使用 [人物 JSON](json-schema.md)；本档负责跨资产统一登记，不重复人物专用字段。
+人物的详细语义字段继续使用 [人物 JSON](json-schema.md)；本档负责跨资产统一登记，不重复人物专用字段。来源与使用边界字段的判定见 [来源、许可与使用边界登记](source-and-rights.md)，不适用时可以省略。
 
 ## 资产交接字段（供分镜拼装引用表）
 

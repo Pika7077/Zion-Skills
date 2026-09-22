@@ -53,8 +53,8 @@ description: 创作、改编和细化 AIGC 短片或短剧剧本。适用于从�
 ## 工作方法
 
 1. 建立故事约束：题材、目标观众、时长、平台、核心人物、冲突和用户要求保留的事实。核心冲突按四要素检查（双方目标不能同时成立、筹码与代价、阻碍的可见形式、退路），见 [故事设计](references/03-story-requirements.md) 的冲突构造一节。确定这部戏给观众的情绪经验与每场兑现的情绪回报，判据与选择集见 [受众期待与情绪回报](references/13-audience-and-payoff.md)；不自行假设观众群体。
-2. 选择适合内容的结构，不强制三幕式、固定钩子时点或固定反转频率。分集讲述时同时安排单集曲线与全剧曲线、切开类型与三张跨集状态表，见 [分集连载](references/14-serial-structure.md)。
-3. 写场次与对白。场次服务于行动、信息、情绪或氛围，不要求每场都有冲突或固定节拍。对白按语言指纹、潜台词、推进力、信息效率与时长自检；需要时读 [对白设计与诊断](references/04-dialogue-design.md)。
+2. 选择适合内容的结构，不强制三幕式、固定钩子时点或固定反转频率。分集讲述时同时安排单集曲线与全剧曲线、切开类型与三张跨集状态表，见 [分集连载](references/14-serial-structure.md)。项目有明确类型或混合类型时，再按 [类型机制](references/16-genre-mechanics.md) 锁定观看承诺、推进证据与回报，不把类型当美术标签。
+3. 写场次与对白。需要写场、改场、删场、组织多场序列或诊断流水账时，读取 [分场结构](references/15-scene-architecture.md)，先分清镜头—场—序列—幕的实际边界，再核对进入状态、当场目标、策略与阻力、转向和退出状态；不要求每场都有冲突、完整起承转合或固定节拍。对白按语言指纹、潜台词、推进力、信息效率与时长自检；需要时读 [对白设计与诊断](references/04-dialogue-design.md)。
 4. 把关键情绪落实为可观察的表演、行动、空间距离或声音；FACS 只在它能提高表演精度时使用，不强制逐句编码。
 5. 检查人物动机、信息顺序、时长、前后状态和结尾完成度。
 
@@ -74,6 +74,8 @@ description: 创作、改编和细化 AIGC 短片或短剧剧本。适用于从�
 ## 质量标准
 
 - 人物选择有动机，结果由行动和因果产生。
+- 每场保留理由可说明，进入与退出之间存在信息、关系、处境、物理状态或观众预期的有效差值。
+- 有明确类型时，关键场次持续提供该类型承诺所需的推进证据，最终回报能回指前文铺垫。
 - 情绪回报有铺垫支撑；关键爆点同时满足期待与出人意料，且结果由前文信息支撑（见 [受众期待与情绪回报](references/13-audience-and-payoff.md)）。
 - 台词符合人物身份，避免重复解释观众已经看到的信息。
 - 关键情绪可以被表演、听见或通过行为推断。
@@ -85,6 +87,8 @@ description: 创作、改编和细化 AIGC 短片或短剧剧本。适用于从�
 
 - 故事设计： [references/03-story-requirements.md](references/03-story-requirements.md)
 - 分集连载（多集）： [references/14-serial-structure.md](references/14-serial-structure.md)
+- 分场与序列结构（写场、改场、删场、组织多场段落）： [references/15-scene-architecture.md](references/15-scene-architecture.md)
+- 类型机制（悬疑、喜剧、恐怖、关系、动作、群像或混合类型）： [references/16-genre-mechanics.md](references/16-genre-mechanics.md)
 - 受众期待与情绪回报： [references/13-audience-and-payoff.md](references/13-audience-and-payoff.md)
 - 对白设计与诊断： [references/04-dialogue-design.md](references/04-dialogue-design.md)
 - 人物与世界： [references/11-character-and-worldbuilding.md](references/11-character-and-worldbuilding.md)

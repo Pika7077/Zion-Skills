@@ -35,6 +35,9 @@ JSON 保留旧字段，新增/明确以下可选字段：
 | shots[].camera_move_triplet | 主动运镜的 origin/direction/stop_result；固定可省略 |
 | shots[].internal_beats | 可选；一镜到底或复杂长镜头的内部时间阶段。阶段共享同一 `shot_number`，记录时间、主体/焦点、摄影机路径和新增信息，不作为独立切镜 |
 | shots[].generation_prompt | 目标模型的生成指令；纯导演稿可空。旧数据的 `seedance_prompt` 仍可读取 |
+| shots[].post_plan | 可选；需要后期时记录具体目的、所需层、可替换区域、余量和降级路径，不写泛泛“后期优化” |
+| shots[].deliverable_variants | 可选；当前镜头涉及的画幅、语言、字幕、声音或内容版本及差异 |
+| shots[].accessibility_notes | 可选；无声理解、非颜色单通道、闪烁风险或字幕可读性的项目级处理与待验证项 |
 
 物理反馈等新字段为兼容旧数据保持可选，不代表创作可忽略。需要时必须在画面正文和模型提示词里体现，不能只写在分析字段。
 
