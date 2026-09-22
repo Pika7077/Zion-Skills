@@ -44,7 +44,7 @@ description: 从剧本、文档、视频或粗分镜中提取并制作人物、�
 6. 视觉风格、画幅/版式、所需角度和不可修改项。
 7. 需要图像提示词时的目标模型、版本/入口和已有参考图。
 
-关键选择无法从上下文判断时给简短选项与建议，等待该项答复，同时推进无依赖工作；已有授权无需特定口令重申。纯提取和登记不询问图像模型。需要图像提示词而未指定引擎时默认 **GPT Image 2** 并记录；Midjourney 仅在用户主动提起时使用。默认采用不等于已生成或已验证。
+关键选择无法从上下文判断时给简短选项与建议，等待该项答复，同时推进无依赖工作；已有授权无需特定口令重申。纯提取和登记不询问图像模型。需要图像提示词时，从 [图像引擎](references/18-image-engines.md) 读取并记录当前默认选择；默认采用不等于已生成或已验证。
 
 ## 承接与让渡
 
@@ -122,7 +122,7 @@ python scripts/extract_characters.py <text-file> --source-type 剧本
 | 完整资产包 | 统一登记表 + 分类资产卡 + 真实文件映射 + 缺口与交接说明 |
 | 批量处理 | 单文件结果 + 合并映射 + 冲突/失败清单 |
 
-人物 JSON 字段见 [人物 JSON](references/json-schema.md)；通用资产字段见 [资产输出契约](references/asset-output-schema.md)。
+人物专用字段见 [人物输出 Schema](references/character-output-schema.md)；通用资产字段见 [资产输出契约](references/asset-output-schema.md)。
 
 ## 质量标准
 

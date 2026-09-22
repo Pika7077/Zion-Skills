@@ -19,7 +19,7 @@
 
 ### 人物提取记录如何登记
 
-提取脚本的 `id` 是兼容旧消费者的单份结果内序号；`extraction_id` 带本次 `extraction_run_id`，用于区分不同文件或运行的提取记录，不能证明人物身份。字段定义见 [人物 JSON](json-schema.md)。
+提取脚本的 `id` 是兼容旧消费者的单份结果内序号；`extraction_id` 带本次 `extraction_run_id`，用于区分不同文件或运行的提取记录，不能证明人物身份。字段定义见 [人物输出 Schema](character-output-schema.md)。
 
 - 未登记的提取结果保持 `asset_id: null`。核对源证据与已有登记后，复用已确认的稳定 `asset_id`，或为新实体建立 ID；不凭姓名、序号或文件名自动匹配。
 - 登记表用 `source_extraction_ids` 保存映射到该资产的提取记录；同名异人分别登记，异名同人经证据确认后可映射到同一资产。

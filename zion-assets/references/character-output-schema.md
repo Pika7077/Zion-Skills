@@ -1,4 +1,4 @@
-# JSON 输出格式完整 Schema
+# 人物输出 Schema
 
 ## 顶层结构
 

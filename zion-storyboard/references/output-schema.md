@@ -16,10 +16,10 @@ JSON 保留旧字段，新增/明确以下可选字段：
 | meta.project_id | 继承剧本的稳定项目 ID |
 | meta.source_script_version | 本分镜所依据的剧本版本 |
 | meta.source_scene_ids | 本生成组覆盖的稳定场次 ID 列表 |
-| meta.target_model | 目标视频模型与版本；用户未指定时填默认 `Seedance 2.5`，用户指定 MiniMax H3 时填 H3 并按 [MiniMax H3 适配](16-minimax-h3-adapter.md) 输出生成块。只做导演分镜时可为空 |
+| meta.target_model | 目标视频模型与版本；用户未指定时从 [模型适配](10-engine-constraints.md) 读取当前默认值，用户指定 MiniMax H3 时按 [MiniMax H3 适配](16-minimax-h3-adapter.md) 输出生成块。只做导演分镜时可为空 |
 | meta.image_engine | 旧数据兼容字段；新分镜不负责选择图像引擎，资产图像引擎记录在 `zion-assets` 交接包中 |
 | meta.pacing_profile | narrative（默认）/ high_energy / legacy_quota |
-| meta.generation_limit_seconds | 包含生成提示词时，填本项目采用的单次预算；用户给定值优先。默认 Seedance 2.5 且没有更短预算时填其普通单次上限 30 秒，并说明默认来源；其他模型使用已核验规格。纯导演稿可空 |
+| meta.generation_limit_seconds | 包含生成提示词时，填本项目采用的单次预算；用户给定值优先，否则从 [模型适配](10-engine-constraints.md) 读取当前默认模型的已核验上限并说明来源。纯导演稿可空 |
 | shots[].shot_function | 镜头带来的叙事作用 |
 | shots[].source_scene_id | 当前镜头回指的剧本场次 ID；必须存在于 `meta.source_scene_ids` |
 | shots[].asset_refs / character_refs / scene_refs / prop_refs | 当前镜头实际使用的资产引用；每项必须唯一命中 `meta.asset_mode` 中保留 ID、版本、状态和文件映射的交接项 |

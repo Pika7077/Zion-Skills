@@ -1,8 +1,24 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v4.41.0`** · 2026-09-22
+**当前版本：`v5.0.0`** · 2026-09-22
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
+
+## v5.0.0 · 2026-09-22 — 职责收口与渐进披露精简
+
+依据 `skill-audit` 对当前安装副本与工作区源文件的审查，完成三项结构调整；未新增顶层 Skill。
+
+- **剧本与分镜边界收口**：`zion-script` 不再维护“简版镜头构想”。只要交付按镜号拆分并决定景别、机位、运镜、时长或剪辑点，即归 `zion-storyboard`；剧本侧保留场次视觉意图、关键动作与声音、进入/退出状态和下游禁改事实。原 `06-shotlist-format.md`、`08-continuity-and-report.md` 已移出技能并归档。
+- **分镜入口按需读取**：`zion-storyboard/SKILL.md` 从 151 行精简到 101 行，最长行从 825 字降到 297 字；保留决策边界、7 步制作流程和全部 33 份参考档的直接路由，移除入口中对视觉叙事、转场、蒙太奇、POV、色彩与人物登场等专档内容的复述。
+- **交付检查分层**：`17-stage5-checklist.md` 从 56 行精简到 34 行，改为 8 项常开门槛 + 条件检查路由；梦境、蒙太奇、跨时空、本地化等专项只在任务命中时加载，不再强加给普通对白分镜。
+- **模型默认值单一来源**：视频默认模型与单次预算只在 `10-engine-constraints.md` 维护；图像默认引擎只在 `18-image-engines.md` 维护。入口、输出契约和专项参考只读取该口径，测试与结构示例保留具体值用于防回退。
+- **命名澄清**：`zion-assets/references/json-schema.md` 更名为 `character-output-schema.md`，与通用 `asset-output-schema.md` 明确区分；全部入站链接已更新。
+- **通用提示词卫生**：`12-prompt-hygiene.md` 改题为“视频提示词卫生”，明确它是跨视频模型的共用判据；Seedance 与 H3 的字段、时长和输出壳仍分别由适配档维护。
+- **暂不拆 `zion-post`**：现有后期相关档仍同时服务前期分镜规划，单独拆出会破坏独立安装；待“已有素材诊断、后期执行方案、版本交付”形成三段完整工作流并出现稳定直接调用后再建独立 Skill。
+
+版本升主版本：本轮含 `zion-script` / `zion-storyboard` 的职责重划，符合版本规则中的结构性更新。
+
+规模：`zion-script` 15 参考档 / 102 回归；`zion-assets` 14 / 106；`zion-storyboard` 33 / 329；`zion-qa` 5 / 58。
 
 ## v4.41.0 · 2026-09-22 — 层次感档补「运动分离」
 
@@ -800,16 +816,16 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有结构调整或成体系吸收（有 → 第一位）；再看是不是新增参考档或"多个小改动同时"（是 → 第二位）；其余都动第三位。**补档不跳主版本**（2026-09-22 拍板）。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v4.41.0`，2026-09-22）
+## 当前规模（`v5.0.0`，2026-09-22）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
-| `zion-script` | 17 | 101 |
-| `zion-assets` | 14 | 105 |
-| `zion-storyboard` | 33 | 327 |
+| `zion-script` | 15 | 102 |
+| `zion-assets` | 14 | 106 |
+| `zion-storyboard` | 33 | 329 |
 | `zion-qa` | 5 | 58 |
 
-校验状态（2026-09-22，`v4.41.0`）：`skill_lint.py --meta` → files=88 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS／META）；脚本回归 31 项全绿（assets 5 + storyboard 26）；四技能 SKILL.md 对本技能参考档直链覆盖 17/17、14/14、33/33、5/5；四份回归编号连续且无重复（101／105／327／58）；技能文件内无版本号。
+校验状态（2026-09-22，`v5.0.0`）：`skill_lint.py --meta` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS；META 仅提示通用提示词档的模型边界声明，人工判定保留）；脚本回归 31 项全绿（assets 5 + storyboard 26）；四技能 SKILL.md 对本技能参考档直链覆盖 15/15、14/14、33/33、5/5；四份回归编号连续且无重复（102／106／329／58）；技能文件内无版本号。
 
 ## 变更记录
 

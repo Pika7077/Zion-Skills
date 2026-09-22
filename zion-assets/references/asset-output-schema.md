@@ -11,7 +11,7 @@
 | `meta.source` | 源剧本、文档、视频、粗分镜或已有资产 |
 | `meta.source_script_version` | 当前资产包所依据的剧本版本 |
 | `meta.source_scene_ids` | 当前资产包覆盖的稳定场次 ID 列表 |
-| `meta.image_engine` | 需要图像提示词时记录目标图像引擎与版本；未指定时为 `GPT Image 2` |
+| `meta.image_engine` | 需要图像提示词时记录目标图像引擎与版本；未指定时从 [图像引擎](18-image-engines.md) 读取当前默认值 |
 | `meta.visual_profile` | 已确认的题材、美术和材质方向 |
 | `meta.style_skeleton` | 项目风格骨架的冻结段文本；同批资产逐字复用，写法见 [资产提示词](asset-prompt-builder.md#项目风格骨架冻结段与变量段) |
 | `meta.style_version` | 冻结段版本号（如 `style_v1`）；替换光源、材质锚点或调色时递增，并记录被替换项 |
@@ -44,7 +44,7 @@
 | `permitted_uses` / `rights_restrictions` | 已明确允许的参考、编辑、生成、发布等用途及限制，不自行补全 |
 | `identity_consent` / `attribution` | 涉及可识别人物、声音或需署名素材时按实际证据记录 |
 
-人物的详细语义字段继续使用 [人物 JSON](json-schema.md)；本档负责跨资产统一登记，不重复人物专用字段。来源与使用边界字段的判定见 [来源、许可与使用边界登记](source-and-rights.md)，不适用时可以省略。
+人物的详细语义字段继续使用 [人物输出 Schema](character-output-schema.md)；本档负责跨资产统一登记，不重复人物专用字段。来源与使用边界字段的判定见 [来源、许可与使用边界登记](source-and-rights.md)，不适用时可以省略。
 
 ## 资产交接字段（供分镜拼装引用表）
 
