@@ -9,7 +9,7 @@
 | 空间 | 平面 | 本档 §一 + [camera-vocabulary.md](camera-vocabulary.md) 构图与景深、[21-relationship-composition.md](21-relationship-composition.md) §三 站位分区 |
 | 光线 | 单调 | 本档 §二 + [20-lighting-system.md](20-lighting-system.md) §五、§七 |
 | 颜色 | 融合 | 本档 §三 + [23-color-and-tone.md](23-color-and-tone.md) §一、[13-camera-and-texture.md](13-camera-and-texture.md) §六 |
-| 表演与叙事 | 直白 | 本档 §四 + [visual-storytelling.md](visual-storytelling.md) §三、[27-guidance-three-steps.md](27-guidance-three-steps.md) |
+| 表演与叙事 | 直白 | 本档 §四 + [visual-storytelling.md](visual-storytelling.md) §四、[27-guidance-three-steps.md](27-guidance-three-steps.md) |
 
 **四层不必同时用满。** 每镜选 1–2 层真正服务的即可；把所有层次一次堆齐，结果是把画面塞满而不是加深。判据始终是**叙事与情感**，不是层次数量。
 
@@ -27,7 +27,7 @@
 **偷空间的三种常用载体**：
 
 - **窗**：窗外若有可辨层次（街、树、另一栋楼），画面深度立刻翻倍。
-- **镜／反光面**：把镜头外的空间折进画面（同 [27-guidance-three-steps.md](27-guidance-three-steps.md) §二 的中景介质）。
+- **镜／反光面**：把镜头外的空间折进画面（同 [27-guidance-three-steps.md](27-guidance-three-steps.md) §三 的中景介质）。
 - **门缝／通道**：透过狭缝看到远处，纵向空间被拉长。
 
 **判定**：遮住画面的一半再问——如果剩下的部分完全读不出"人物在什么空间里"，说明纵深只靠装饰，不靠结构。
@@ -117,7 +117,7 @@
 
 | 手法 | 做法 | 涉及档 |
 |---|---|---|
-| **预埋** | 关系与危险暗示在事件之前给出 | [27-guidance-three-steps.md](27-guidance-three-steps.md) §三 |
+| **预埋** | 关系与危险暗示在事件之前给出 | [27-guidance-three-steps.md](27-guidance-three-steps.md) §四 |
 | **延迟** | 用新悬念替换旧悬念，而不是拖时间 | 同上 §二 |
 | **解读反转** | 同一件事在后文被赋予新含义（同素材不同理解） | [24-visual-motifs.md](24-visual-motifs.md) 复现四手法 |
 

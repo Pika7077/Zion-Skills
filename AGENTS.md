@@ -14,7 +14,8 @@
 | 手册 | `Zion技能使用手册.md` |
 | 版本与变更记录 | `CHANGELOG.md` |
 | Git 仓库 | 工作区根目录，`main` 分支，纯本地无远端；`.workbuddy/locks`、`.workbuddy/state` 与嵌套仓库 `codex-skills/` 不入库 |
-| 长期约定与单一来源地图 | `.workbuddy/memory/MEMORY.md` |
+| 长期约定与事实 | `.workbuddy/memory/MEMORY.md` |
+| 单一来源地图（风格／色彩／镜头／声音等内容归属哪一档） | `.workbuddy/memory/style-single-source.md` |
 
 ## Git 跟踪边界
 
@@ -69,7 +70,7 @@
 
 ## 维护契约
 
-- 本文件是流程唯一来源；`.workbuddy/memory/MEMORY.md` 只记长期约定与单一来源地图，手册只做入口与使用说明，都不重复流程。
+- 本文件是流程唯一来源；`.workbuddy/memory/MEMORY.md` 只记长期约定与事实，内容归属登记在 `.workbuddy/memory/style-single-source.md`，手册只做入口与使用说明，都不重复流程。
 - 改流程 → 改本文件。
-- 改风格与色彩的归属 → 改 `MEMORY.md` 的单一来源地图。
+- 改风格与色彩的归属 → 改 `style-single-source.md`。
 - 技能内容改动收工后 → 更新 `CHANGELOG.md` 的当前版本号与变更记录；版本号只在该文件与对话中声明，**不写进技能文件**。
