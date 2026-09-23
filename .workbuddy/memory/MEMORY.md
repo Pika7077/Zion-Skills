@@ -22,6 +22,16 @@
 - `parse_input.py` 在 `zion-assets` 与 `zion-storyboard` 各存一份完整副本（已登记 DECLARED_DUPES，内容须一致），供各自单独安装。
 - 不用“薄壳委托”或跨技能相对路径解决此类问题——会让单独安装功能缺失。
 
+## 安装与安装后验证（2026-09-23 建立）
+
+安装＝`python .workbuddy/tools/sync_skills.py --target workbuddy`（镜像规则：缺失补齐、内容不同则覆盖、源已删的一并移除）。装机后按五项验证，缺一项不算装完：
+
+1. **幂等自检**：紧跟一次 `--dry`，应显示 `added=0 updated=0 removed=0`。
+2. **逐技能内容比对**：`diff -r --exclude=__pycache__ <技能> ~/.workbuddy/skills/<技能>`，四个技能都无输出。
+3. **安装目录顶层 ≠ 工作区**：那里还有非本家族的技能（`skill-audit`、`init-project-workspace`、`reclaim-code-entropy`）与 `_bm_skillid_migration.json`，**不属于本仓库，不要清理**；`sync_skills.py` 也只处理 `SKILLS` 里的四个目录。
+4. **在安装副本上重跑两组回归**（`python -B zion-assets/tests/test_extract_characters.py`、`python -B zion-storyboard/tests/test_storyboard_audit.py`）——工作区绿不等于装机可用，路径与打包差异要在这里暴露。
+5. **元数据用 Python 显式 UTF-8 读一次**，确认解码合法、无 BOM、LF。**bash 里 `head`／`grep` 看 SKILL.md 中文会显示乱码，那是 Windows 终端 GBK 显示问题，不是文件损坏**——别据此判定装机失败。
+
 ## 并发写入：已发生的两起事故（2026-09-20）
 
 - `zion-script/references/12-visual-style-and-grading.md` 被另一会话整篇替换（170 行词库版 → 35 行“剧本阶段锁定视觉事实”版），我的改动被覆盖。
