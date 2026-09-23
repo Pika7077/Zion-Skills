@@ -1,8 +1,16 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v5.1.0`** · 2026-09-23
+**当前版本：`v5.1.1`** · 2026-09-23
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
+
+## v5.1.1 · 2026-09-23 — 版本标注全面同步
+
+用户口径：**不管修改哪个，都同步更新版本号。**
+
+- `Zion技能使用手册.md` 顶部的「版本日期」由 2026-09-22 更新为 **2026-09-23**——这是全库唯一滞后的版本标注。
+- `AGENTS.md` 维护契约把这条写明确：技能内容、根级文档（手册／README／本文件）与记录类文件（「当前规模」表、校验状态行）改动，都要更新 `CHANGELOG.md` 的版本号与条目，**包括手册顶部与校验状态里的版本标注**；并区分出**技能档里的「核验日期」是外部资料核对时间，不随版本走**（`18-image-engines`／`19-genre-style-profiles`／`film-and-print-stocks`／`10-engine-constraints` 的 2026-09-20／21 与 `facs-reference` 的 2026-09-21 保持原值）。
+- 本轮核查同时确认：**规模表数字与实测逐一吻合**（script 15／102、assets 14／106、storyboard 33／330、qa 5／58）；技能目录内**无版本号残留**；`README.md` 与 `AGENTS.md` 无日期标注。**本次为记录类同步，无技能内容改动。**
 
 ## v5.1.0 · 2026-09-23 — 去掉「空间草图」交付物与顶层空间字段
 
@@ -835,7 +843,7 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有结构调整或成体系吸收（有 → 第一位）；再看是不是新增参考档或"多个小改动同时"（是 → 第二位）；其余都动第三位。**补档不跳主版本**（2026-09-22 拍板）。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v5.1.0`，2026-09-23）
+## 当前规模（`v5.1.1`，2026-09-23）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
@@ -844,7 +852,7 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 | `zion-storyboard` | 33 | 330 |
 | `zion-qa` | 5 | 58 |
 
-校验状态（2026-09-23，`v5.1.0`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 31 项全绿（assets 5 + storyboard 26）；含旧 `space_layout` 字段的数据实测导出不报错；四技能 SKILL.md 直链覆盖 15/15、14/14、33/33、5/5；技能文件内无版本号。
+校验状态（2026-09-23，`v5.1.1`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 31 项全绿（assets 5 + storyboard 26）；含旧 `space_layout` 字段的数据实测导出不报错；四技能 SKILL.md 直链覆盖 15/15、14/14、33/33、5/5；技能文件内无版本号。
 
 ## 变更记录
 
