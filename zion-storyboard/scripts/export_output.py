@@ -552,8 +552,6 @@ def generate_markdown(data: dict) -> str:
 
         if data.get('group_summary'):
             md.append(f"本组剧情：{data['group_summary']}")
-        if data.get('space_layout'):
-            md.append(f"人物空间站位：{data['space_layout']}")
         if data.get('environment'):
             md.append(f"环境：{data['environment']}")
         md.append("")
