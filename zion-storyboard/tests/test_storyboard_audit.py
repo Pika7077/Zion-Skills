@@ -20,6 +20,7 @@ def fixture():
             'aperture': 'f/4', 'pov_family': '过肩', 'camera_height': '平视',
             'camera_angle': '平拍',
             'composition': '匹配视线', 'camera_movement': '固定',
+            'lighting': '左侧窗光照亮手和合同，人物背光侧保留面部细节',
             'description': ['手指压住合同', '反打林岚，手离开合同', '合同停止，两人等待回答'][i],
             'seedance_prompt': ['手指压住合同', '反打林岚，手离开合同', '合同停止，两人等待回答'][i],
             'new_feedback': ['合同移动受阻', '手退出交接位置', '对峙没有得到回答'][i],
@@ -94,6 +95,25 @@ class Regression(unittest.TestCase):
         out=generate_markdown(d)
         self.assertIn('未指定（纯导演稿）', out)
         self.assertNotIn('完整提示词', out)
+
+    def test_formal_shots_require_framing_movement_and_lighting(self):
+        for field in ('framing', 'camera_movement', 'lighting'):
+            with self.subTest(field=field):
+                d = fixture()
+                d['shots'][0][field] = ''
+                self.assertTrue(any(field in issue for issue in validate_shot(d['shots'][0])))
+                self.assertTrue(any(field in issue for issue in audit_variety(d)['issues']))
+
+        d = fixture()
+        d['shots'][0]['lighting'] = '同上'
+        self.assertTrue(any('lighting' in issue for issue in validate_shot(d['shots'][0])))
+        self.assertTrue(any('lighting' in issue for issue in audit_variety(d)['issues']))
+
+    def test_markdown_shows_camera_and_lighting_choices(self):
+        out = generate_markdown(fixture())
+        self.assertIn('镜头1（0-10秒）：特写', out)
+        self.assertIn('**运镜**：固定', out)
+        self.assertIn('**光线**：左侧窗光照亮手和合同', out)
 
     def test_fractional_times_allowed(self):
         d=fixture(); d['shots'][0]['time_range']['end']=9.5; d['shots'][0]['duration_seconds']=9.5

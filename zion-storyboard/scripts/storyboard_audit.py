@@ -161,9 +161,11 @@ def audit_content(data):
         'scene_ref_angles': [s['scene_ref_angle'] for s in shots if s.get('scene_ref_angle')],
     }
     for s in shots:
-        for field in ('description', 'new_feedback'):
+        for field in ('framing', 'camera_movement', 'lighting', 'description', 'new_feedback'):
             if not isinstance(s.get(field), str) or not s[field].strip():
                 issues.append(f"镜头 {s.get('shot_number', '?')} 缺少 {field}")
+        if str(s.get('lighting') or '').strip() == '同上':
+            issues.append(f"镜头 {s.get('shot_number', '?')} 的 lighting 不能只写同上")
     for a, b in zip(shots, shots[1:]):
         if a.get('description') and a.get('description') == b.get('description'):
             warnings.append(f"镜头 {a.get('shot_number')} 与 {b.get('shot_number')} 描述相同，人工核对是否重复事件")

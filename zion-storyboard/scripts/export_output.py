@@ -144,10 +144,12 @@ def asset_binding(asset: dict) -> str:
 def validate_shot(shot: dict, require_prompt: bool = False) -> list:
     """验证单个镜头的必要字段，返回错误列表"""
     errors = []
-    required = ['shot_number', 'time_range', 'framing', 'camera_movement', 'description']
+    required = ['shot_number', 'time_range', 'framing', 'camera_movement', 'lighting', 'description']
     for field in required:
-        if field not in shot or shot[field] is None or shot[field] == '':
+        if field not in shot or shot[field] is None or not str(shot[field]).strip():
             errors.append(f"镜头 {shot.get('shot_number', '?')} 缺少字段: {field}")
+    if str(shot.get('lighting') or '').strip() == '同上':
+        errors.append(f"镜头 {shot.get('shot_number', '?')} 的 lighting 不能只写同上")
     if require_prompt and not generation_prompt(shot).strip():
         errors.append(f"镜头 {shot.get('shot_number', '?')} 缺少 generation_prompt/seedance_prompt")
     return errors
@@ -472,6 +474,7 @@ def generate_markdown(data: dict) -> str:
         if shot.get('composition'):
             md.append(f"- **构图**：{shot.get('composition')}")
         md.append(f"- **运镜**：{shot.get('camera_movement', '?')}")
+        md.append(f"- **光线**：{shot.get('lighting', '?')}")
         if shot.get('camera_angle'):
             md.append(f"- **角度**：{shot.get('camera_angle', '')}")
         if shot.get('scene_ref_angle'):

@@ -1,8 +1,14 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v5.1.1`** · 2026-09-23
+**当前版本：`v5.2.0`** · 2026-09-23
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
+
+## v5.2.0 · 2026-09-23 — 正式分镜摄影信息进入交付门槛
+
+- `zion-storyboard` 正式导演稿逐镜明确景别、运镜（含固定）和可见光线结果；同场灯光可简述继承效果，发生变化时明确写出，粗分镜仍按事件覆盖交付。
+- 输出契约补 `lighting` 字段与示例；Markdown 导出增加光线栏，验证与结构审计拒绝缺少景别、运镜、光线以及光线只写“同上”的镜头。
+- 回归增加正式稿字段检查和导出检查，人工案例 330 → 331；已同步到 Codex 安装目录。
 
 ## v5.1.1 · 2026-09-23 — 版本标注全面同步
 
@@ -843,16 +849,16 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有结构调整或成体系吸收（有 → 第一位）；再看是不是新增参考档或"多个小改动同时"（是 → 第二位）；其余都动第三位。**补档不跳主版本**（2026-09-22 拍板）。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v5.1.1`，2026-09-23）
+## 当前规模（`v5.2.0`，2026-09-23）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
 | `zion-script` | 15 | 102 |
 | `zion-assets` | 14 | 106 |
-| `zion-storyboard` | 33 | 330 |
+| `zion-storyboard` | 33 | 331 |
 | `zion-qa` | 5 | 58 |
 
-校验状态（2026-09-23，`v5.1.1`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 31 项全绿（assets 5 + storyboard 26）；含旧 `space_layout` 字段的数据实测导出不报错；四技能 SKILL.md 直链覆盖 15/15、14/14、33/33、5/5；技能文件内无版本号。
+校验状态（2026-09-23，`v5.2.0`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；`zion-storyboard` Skill 基本验证通过；四技能 SKILL.md 直链覆盖 15/15、14/14、33/33、5/5；技能文件内无版本号。
 
 ## 变更记录
 
