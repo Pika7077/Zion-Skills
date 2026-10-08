@@ -34,12 +34,14 @@
 
 ## 对外分发：分享给他人（2026-10-08 建立）
 
-仓库 `https://gitee.com/ZionZhang/zion-skills.git`（**私有**，需先在 Gitee 把对方加为仓库成员，否则 clone 认证失败）。
+仓库 `https://gitee.com/ZionZhang/zion-skills.git`（**公开**，匿名 `git clone` 实测可用，无需凭据——2026-10-08 实测更正了前一版「私有需加成员」的错误推断）。
 
-- **安装＝克隆后把技能目录整体复制到安装目录**（`~/.workbuddy/skills/` 或 `~/.codex/skills/`）。可四个一起装，也可只装一个（单独安装是受支持用法）。
+- **首选做法：把仓库地址与安装提示词直接发给对方的 agent，让它自己装。** 提示词模板在 `README.md` 第 3.1 节，可直接转发。
+- **手工安装**＝克隆后把技能目录整体复制到安装目录（`~/.workbuddy/skills/` 或 `~/.codex/skills/`）。可四个一起装，也可只装一个（单独安装是受支持用法）。
+- **`sync_skills.py` 只支持 `--target codex|workbuddy`**（`TARGETS` 字典硬编码这两个）。写成 `--target <环境>` 这种泛化说法会让 Claude Code 用户报「未知目标」——**写指令时必须写明只覆盖这两个**，其他环境走手工复制。
 - **更新＝不要只覆盖 `SKILL.md`**。技能是一整个目录，`references/` 会增删。正确做法：在克隆目录 `git pull` 后重跑 `sync_skills.py --target <目标>`，或重新克隆整体覆盖。**仓库更新 ≠ 安装目录生效**，这是两件事。
 - **装完／更新后必须重启客户端**（WorkBuddy / Codex），否则新技能不进选择器。
-- 完整命令写在 `README.md` 第三章（4 小节：分享安装／本机同步／通用规则／更新）。手册十四章只留指针。
+- **镜像规则会顺带清掉旧元数据**：工作区已无 `_user_meta.json`，所以对方安装时该文件会被一并移除（`--dry` 会显示在 `removed` 里），由客户端重新生成——这是预期行为。
 
 ### `_user_meta.json` 不随仓库分发（2026-10-08 修正）
 
@@ -121,7 +123,7 @@ lint 只查 Markdown 链接、标题锚点与 `§x` 引用，**不查「八种�
 - 工作区是 Git 仓库（`main` 分支）；**收工最后一步提交**（`AGENTS.md` 标准循环第 11 步），提交信息写清技能、改动与版本号。
 - 远端 Gitee `origin`（HTTPS）。推送需 `env -u https_proxy -u http_proxy -u HTTPS_PROXY -u HTTP_PROXY`（沙箱注入的代理会中断传输），仓库级 `http.version HTTP/1.1`；用户名填 **Gitee 用户名**而非邮箱，密码用私人令牌。非交互环境加 `GIT_TERMINAL_PROMPT=0` 防挂起。
 - **推送必须加 `GIT_CONFIG_NOSYSTEM=1`**（2026-09-22 实测；写这条前连着失败三次）。PortableGit 的**系统级** `etc/gitconfig` 设了 `credential.helper=helper-selector`，它每次认证要跑约 **40 秒**——内部连做 `git config helperselector.selected`、`--show-origin credential.helper`、`--system -e` 数次查询，中间约 36 秒无动作，常在真正传输前就被超时杀掉，表现为 **push 无输出挂死**（`git push -v` 停在 `Pushing to ...`）。加 `GIT_CONFIG_NOSYSTEM=1` 忽略系统配置后直接走 global 的 GCM，秒成。**这也是本机反复出现 credential helper 活动的原因**（`GIT_TRACE=1` 可直接看到那一串 `git config` 调用）。
-- **推送后的确认用本地命令**（`git status -sb` / `git log --oneline`），不要用 `git ls-remote`——它对私有仓库每次都要重新走一遍上面的凭据链。push 自身的输出已含 `旧..新 branch -> branch`，足够判断结果。
+- **推送后的确认用本地命令**（`git status -sb` / `git log --oneline`），不要用 `git ls-remote`——后者是多余的网络往返（仓库虽为公开，但本地命令已足够）。push 自身的输出已含 `旧..新 branch -> branch`，足够判断结果。
 - `git branch -vv` 报 `origin/main: gone` **只是本地 remote-tracking 引用过期**，不代表远端被删。
 - **换行符一律 LF**：`.gitattributes` 配 `eol=lf`，`core.autocrlf=false`。Windows 写入工具可能默认落 CRLF——新写或改写文件后要核对；混合换行会触发 `skill_guard.py check` 的假漂移告警。
 - `.gitignore` 忽略 `.workbuddy/locks`、`.workbuddy/state` 与嵌套仓库 `/codex-skills/`。

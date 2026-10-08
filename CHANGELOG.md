@@ -1,6 +1,6 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v5.6.1`** · 2026-10-08
+**当前版本：`v5.6.2`** · 2026-10-08
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
 
@@ -872,7 +872,7 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有结构调整或成体系吸收（有 → 第一位）；再看是不是新增参考档或"多个小改动同时"（是 → 第二位）；其余都动第三位。**补档不跳主版本**（2026-09-22 拍板）。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v5.6.1`，2026-10-08）
+## 当前规模（`v5.6.2`，2026-10-08）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
@@ -881,9 +881,20 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 | `zion-storyboard` | 33 | 342 |
 | `zion-qa` | 5 | 58 |
 
-校验状态（2026-10-08，`v5.6.1`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
+校验状态（2026-10-08，`v5.6.2`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
 
 ## 变更记录
+
+### `v5.6.2` · 2026-10-08 — 发给对方 agent 的安装提示词；更正仓库可见性
+
+用户澄清「我想要的是发给 agent 的安装指令」——v5.6.1 写的 `git clone` + `cp` 是给**人**看的，不是给 **agent** 用的。本轮补上可直接转发的提示词，并顺带查实并更正两处旧错误。
+
+- **`README.md` 第三章重构为 5 小节**，新增并置顶 **3.1「把仓库发给对方的 agent，让它自己装（推荐）」**：一段可直接原样转发的自包含提示词，agent 据此自行探测环境、`git clone`、装到对应目录、回报结果。另有 3.2 手工安装（原 3.1）、3.3 维护者本机同步、3.4 两条通用规则、3.5 后续更新的安装命令。
+- **更正「仓库为私有」**：v5.6.1 推断仓库私有、要求对方先加 Gitee 成员。本轮以匿名 `git ls-remote`（不带任何凭据）实测成功，**仓库实为公开**；README、手册与 `MEMORY.md` 三处表述一并更正。
+- **更正提示词的准确性**：提示词初稿写「可直接跑 `sync_skills.py --target <你的环境>`」，实测 `TARGETS` 只硬编码 `codex`／`workbuddy`，传 `claude` 报「未知目标」。已改为写明**该脚本只覆盖这两个目标，其他环境走手工复制**，避免把 Claude Code 用户引向报错路径。
+- **实测验证（模拟对方全新环境）**：`/tmp` 下匿名 `git clone --depth 1` 成功；克隆副本 `_user_meta.json` **零残留**（v5.6.1 的清洁度修正生效）；`sync_skills.py --dry` 在克隆副本内可直接运行。
+- **`Zion技能使用手册.md` 十四章**指针精度改为「第 3.1 节」，并注明仓库公开。手册明示可直接转发的提示词位置。
+- 校验：`skill_lint.py` → files=86 problems=0；**无技能内容改动**（仅根级文档与记忆档）。
 
 ### `v5.6.1` · 2026-10-08 — 补齐对外分发安装说明与分发包清洁度
 

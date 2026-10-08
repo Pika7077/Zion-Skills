@@ -540,7 +540,7 @@ $zion-qa
 - 四个技能均支持单独安装。其他技能可用且任务需要时再交接；缺少下游技能时先交付本技能范围内的结果、已确认事实和待补材料，明确尚未完成的部分。跨技能引用只写技能名和档名，不写相对路径。
 - `parse_input.py` 在 `zion-assets` 与 `zion-storyboard` 各存一份，供各自单独安装；两份内容必须完全一致，由 `skill_lint.py` 的 DECLARED DUPLICATE 项校验。
 - 安装目标分别为 `~/.codex/skills` 与 `~/.workbuddy/skills`，各会话按工作区规程同步自己使用的安装目录。
-- **分享给他人**：对方 `git clone https://gitee.com/ZionZhang/zion-skills.git` 后，把 `zion-script`／`zion-assets`／`zion-storyboard`／`zion-qa` 整体复制到上述安装目录即可；仓库为私有，需先在 Gitee 把对方加为仓库成员。完整命令见 [`README.md`](README.md) 第三章。
+- **分享给他人**：仓库 `https://gitee.com/ZionZhang/zion-skills.git` 为公开仓库，对方 `git clone` 后把四个技能目录整体复制到上述安装目录即可。**最省事的做法是把仓库地址发给对方的 agent，让它自己装**——可直接转发的安装提示词见 [`README.md`](README.md) 第 3.1 节。
 - **更新已安装的旧版本**：在克隆目录里 `git pull` 后重跑同步（或重新克隆覆盖），**不要只覆盖 `SKILL.md`**——技能是一整个目录，`references/` 会增删。仓库更新与安装目录生效是两件事。
 - 安装后若新 Skill 未出现在选择器中，重启对应客户端（Codex / WorkBuddy）再检查。
 

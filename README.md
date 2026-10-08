@@ -40,9 +40,37 @@ zion-qa              投喂前检查与生成后验收
 
 ## 三、安装与同步
 
-分两种场景：**维护者本机同步**（你自己改完往外镜像）与**分享给他人安装**（对方只取用，不改）。
+分三种场景：**发给对方的 agent 自行安装**（最省事，对方不用敲命令）、**分享给他人手工安装**、**维护者本机同步**（你自己改完往外镜像）。
 
-### 3.1 分享给他人：克隆后安装
+### 3.1 把仓库发给对方的 agent，让它自己装（推荐）
+
+如果对方也在用 agent（WorkBuddy / Codex / Claude Code 等），**不用教他敲命令**——把下面这一段原样发过去即可。对方的 agent 会自己探测环境、拉取、装到正确目录并验证。
+
+```text
+请帮我安装 Zion 技能家族（AIGC 短片/短剧的四段式技能包：剧本→资产→分镜→校验）。
+
+仓库：https://gitee.com/ZionZhang/zion-skills.git
+包含四个技能：zion-script、zion-assets、zion-storyboard、zion-qa
+
+请按以下步骤操作：
+1. git clone 到临时目录（若已克隆过则 git pull 更新）。公开仓库，无需凭据。
+2. 判断你自己的工作环境，把四个技能目录整体复制到对应的技能目录：
+   - WorkBuddy → ~/.workbuddy/skills/
+   - Codex     → ~/.codex/skills/
+   - Claude Code → ~/.claude/skills/
+   （Windows 下 ~ 指 %USERPROFILE%；不确定环境时先问我，不要猜）
+3. 若环境是 WorkBuddy 或 Codex，也可以直接在仓库里跑脚本，它会自动解析你的实际安装路径：
+   python .workbuddy/tools/sync_skills.py --target workbuddy   # 或 --target codex
+   （该脚本只支持这两个目标；其他环境请手工复制。）
+4. 整个目录一起装，不要只复制 SKILL.md——技能还包含 references/ 与 tests/ 子目录。
+5. 装完告诉我：装到哪个目录、四个技能是否都在、以及需要重启客户端才能生效。
+```
+
+对方回执后，**提醒他重启客户端**，技能才会出现在选择器里。
+
+验证过的事实（可直接转述给对方）：仓库公开、匿名 `git clone` 可用；克隆副本不含 `_user_meta.json` 等本机元数据；`sync_skills.py --target <codex|workbuddy>` 在克隆副本里可直接运行，用 `--dry` 可先看差异不写入。
+
+### 3.2 手工安装（不给 agent 时）
 
 仓库地址：`https://gitee.com/ZionZhang/zion-skills.git`
 
@@ -69,11 +97,11 @@ Copy-Item -Recurse zion-script,zion-assets,zion-storyboard,zion-qa "$env:USERPRO
 
 装完**重启对应客户端**（WorkBuddy / Codex），否则新技能不会出现在选择器中。
 
-> 仓库为私有：请在 Gitee 仓库「管理 → 仓库成员管理」把对方加为成员，否则 `clone` 无法通过认证。
+> 公开仓库，对方无需账号即可 `clone`。
 
 **分享出去的包是干净的**：技能目录里的 `_user_meta.json`（本机安装时间戳与来源）已从版本控制移除，对方安装时由客户端自行生成自己的那份。
 
-### 3.2 维护者本机同步
+### 3.3 维护者本机同步
 
 **本工作区是唯一真相源，安装目录只写不改。** 技能改动一律先在工作区完成，再镜像出去。
 
@@ -85,12 +113,12 @@ python .workbuddy/tools/sync_skills.py --dry                # 只报告差异
 
 克隆本仓库后同样可直接跑这个脚本，等价于上面的手工复制。
 
-### 3.3 两条通用规则
+### 3.4 两条通用规则
 
 - 手工安装等价于把某个技能目录整体复制到安装目录下，例如把 `zion-storyboard/` 复制为 `~/.workbuddy/skills/zion-storyboard/`。
 - 单独安装是受支持的用法：跨技能引用只写技能名与档名，不写相对路径；确为单独安装而有意双份的文件已在 `.workbuddy/tools/skill_lint.py` 的 `DECLARED_DUPES` 登记。
 
-### 3.4 后续更新的安装命令
+### 3.5 后续更新的安装命令
 
 已安装的旧版本**不要覆盖 `SKILL.md` 就完事**——技能是一整个目录（`references/` 会增删、`tests/` 会更新），必须整体同步。推荐两种方式：
 
