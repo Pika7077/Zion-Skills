@@ -1,6 +1,6 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v5.6.2`** · 2026-10-08
+**当前版本：`v5.6.3`** · 2026-10-08
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
 
@@ -872,7 +872,7 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有结构调整或成体系吸收（有 → 第一位）；再看是不是新增参考档或"多个小改动同时"（是 → 第二位）；其余都动第三位。**补档不跳主版本**（2026-09-22 拍板）。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v5.6.2`，2026-10-08）
+## 当前规模（`v5.6.3`，2026-10-08）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
@@ -881,9 +881,19 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 | `zion-storyboard` | 33 | 342 |
 | `zion-qa` | 5 | 58 |
 
-校验状态（2026-10-08，`v5.6.2`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
+校验状态（2026-10-08，`v5.6.3`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
 
 ## 变更记录
+
+### `v5.6.3` · 2026-10-08 — 改用归档 zip 作为首选安装方式
+
+用户问「仓库已经开源，有更简单的安装方式吗」。核对了三种取包方式的实测数据，改用 Gitee 归档 zip 作首选。
+
+- **`README.md` 3.1 节**：转发的提示词从「`git clone`」改为「下载归档 zip」（约 900KB），git 降为备选；新增三种取包方式的对比表（体积／是否需要 git／说明）与机器可读的极简命令；写明归档地址 `.../repository/archive/main.zip`。3.2 手工安装补 zip 等价写法，git 作为替代项。3.5 更新章节改为「没有 git 用 zip 覆盖／有 git 用 pull + 同步」两路。
+- **手册十四章**指针补上归档地址与「约 900KB、无需 git」的提要。
+- **实测数据**（`/tmp` 下逐一验证，非估算）：归档 zip **892KB**（HTTP 200）；浅克隆 **3.0M**，其中 `.git` 808K、四个技能仅 1.1M；全量克隆更大。三种方式装出的目录**内容完全一致**——`zion-script` 17 文件／`zion-assets` 19／`zion-storyboard` 39／`zion-qa` 7，四个 `SKILL.md` 入口齐全；归档解压后**无 `.git`、无 `_user_meta.json`**。
+- **为何改用 zip**：体积省约 70%；不依赖对方装 git（很多 agent 环境能下载但没有 git）；不含版本历史与本机元数据。缺点是升级时整体覆盖、无法精确处理删除——需要精确增删时仍走 git + `sync_skills.py`。
+- 校验：`skill_lint.py` → files=86 problems=0；**无技能内容改动**。
 
 ### `v5.6.2` · 2026-10-08 — 发给对方 agent 的安装提示词；更正仓库可见性
 

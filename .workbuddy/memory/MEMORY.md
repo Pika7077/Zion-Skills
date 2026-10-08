@@ -36,10 +36,14 @@
 
 仓库 `https://gitee.com/ZionZhang/zion-skills.git`（**公开**，匿名 `git clone` 实测可用，无需凭据——2026-10-08 实测更正了前一版「私有需加成员」的错误推断）。
 
-- **首选做法：把仓库地址与安装提示词直接发给对方的 agent，让它自己装。** 提示词模板在 `README.md` 第 3.1 节，可直接转发。
-- **手工安装**＝克隆后把技能目录整体复制到安装目录（`~/.workbuddy/skills/` 或 `~/.codex/skills/`）。可四个一起装，也可只装一个（单独安装是受支持用法）。
+- **首选安装方式：归档 zip**（2026-10-08 实测选定）。地址 `https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip`，**892KB**、HTTP 200、无需 git、无需账号；解压后顶层即四个技能，**不含 `.git` 与 `_user_meta.json`**。对比：浅克隆 3.0M（`.git` 占 808K，四个技能仅 1.1M）。
+  - 选它的理由：体积省约 70%；**不依赖对方装 git**（很多 agent 环境能下载但没有 git）；包更干净。
+  - 它的代价：升级时要**整体覆盖**，无法精确处理「源已删的文件」——需要精确增删时仍走 git + `sync_skills.py`。
+  - **三种方式装出的目录内容完全一致**：script 17／assets 19／storyboard 39／qa 7 文件。
+- **把提示词直接发给对方的 agent**，让它自己装。模板在 `README.md` 第 3.1 节，可原样转发。
+- **手工安装**＝解压或克隆后把技能目录整体复制到安装目录（`~/.workbuddy/skills/` 或 `~/.codex/skills/`）。可四个一起装，也可只装一个（单独安装是受支持用法）。
 - **`sync_skills.py` 只支持 `--target codex|workbuddy`**（`TARGETS` 字典硬编码这两个）。写成 `--target <环境>` 这种泛化说法会让 Claude Code 用户报「未知目标」——**写指令时必须写明只覆盖这两个**，其他环境走手工复制。
-- **更新＝不要只覆盖 `SKILL.md`**。技能是一整个目录，`references/` 会增删。正确做法：在克隆目录 `git pull` 后重跑 `sync_skills.py --target <目标>`，或重新克隆整体覆盖。**仓库更新 ≠ 安装目录生效**，这是两件事。
+- **更新＝不要只覆盖 `SKILL.md`**。技能是一整个目录，`references/` 会增删。**仓库更新 ≠ 安装目录生效**，必须重新拷贝或跑同步。
 - **装完／更新后必须重启客户端**（WorkBuddy / Codex），否则新技能不进选择器。
 - **镜像规则会顺带清掉旧元数据**：工作区已无 `_user_meta.json`，所以对方安装时该文件会被一并移除（`--dry` 会显示在 `removed` 里），由客户端重新生成——这是预期行为。
 

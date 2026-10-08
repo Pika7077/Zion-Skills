@@ -44,40 +44,71 @@ zion-qa              投喂前检查与生成后验收
 
 ### 3.1 把仓库发给对方的 agent，让它自己装（推荐）
 
-如果对方也在用 agent（WorkBuddy / Codex / Claude Code 等），**不用教他敲命令**——把下面这一段原样发过去即可。对方的 agent 会自己探测环境、拉取、装到正确目录并验证。
+如果对方也在用 agent（WorkBuddy / Codex / Claude Code 等），**不用教他敲命令**——把下面这一段原样发过去即可。对方的 agent 会自己下载、装到正确目录并验证。
 
 ```text
 请帮我安装 Zion 技能家族（AIGC 短片/短剧的四段式技能包：剧本→资产→分镜→校验）。
 
-仓库：https://gitee.com/ZionZhang/zion-skills.git
-包含四个技能：zion-script、zion-assets、zion-storyboard、zion-qa
+下载地址（公开，无需账号）：
+https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
+
+包含四个技能目录：zion-script、zion-assets、zion-storyboard、zion-qa
 
 请按以下步骤操作：
-1. git clone 到临时目录（若已克隆过则 git pull 更新）。公开仓库，无需凭据。
+1. 下载上面的 zip 并解压到临时目录（约 900KB；若你的环境有 git，
+   也可以 git clone https://gitee.com/ZionZhang/zion-skills.git）。
 2. 判断你自己的工作环境，把四个技能目录整体复制到对应的技能目录：
-   - WorkBuddy → ~/.workbuddy/skills/
-   - Codex     → ~/.codex/skills/
-   - Claude Code → ~/.claude/skills/
+   - WorkBuddy    → ~/.workbuddy/skills/
+   - Codex        → ~/.codex/skills/
+   - Claude Code  → ~/.claude/skills/
    （Windows 下 ~ 指 %USERPROFILE%；不确定环境时先问我，不要猜）
-3. 若环境是 WorkBuddy 或 Codex，也可以直接在仓库里跑脚本，它会自动解析你的实际安装路径：
-   python .workbuddy/tools/sync_skills.py --target workbuddy   # 或 --target codex
-   （该脚本只支持这两个目标；其他环境请手工复制。）
-4. 整个目录一起装，不要只复制 SKILL.md——技能还包含 references/ 与 tests/ 子目录。
-5. 装完告诉我：装到哪个目录、四个技能是否都在、以及需要重启客户端才能生效。
+3. 整个目录一起装，不要只复制 SKILL.md——技能还包含 references/ 与 tests/ 子目录。
+4. 装完告诉我：装到哪个目录、四个技能是否都在、以及需要重启客户端才能生效。
 ```
 
 对方回执后，**提醒他重启客户端**，技能才会出现在选择器里。
 
-验证过的事实（可直接转述给对方）：仓库公开、匿名 `git clone` 可用；克隆副本不含 `_user_meta.json` 等本机元数据；`sync_skills.py --target <codex|workbuddy>` 在克隆副本里可直接运行，用 `--dry` 可先看差异不写入。
+**为什么用 zip 而不是 git**：归档包 892KB，浅克隆 3.0M（其中 808K 是 `.git`）；归档不含版本历史，也**不含 `_user_meta.json` 等本机元数据**；而且不依赖对方装 git——很多 agent 环境有网络下载能力但没有 git。
+
+**实测过的三种取包方式**（可直接转述给对方）：
+
+| 方式 | 体积 | 需要 git | 说明 |
+|---|---:|---|---|
+| **zip 归档**（推荐） | 892KB | 否 | `curl -sL -o zion.zip <归档地址>` 后解压，顶层即四个技能 |
+| 浅克隆 | 3.0M | 是 | `git clone --depth 1`，要长期跟随更新时用 |
+| 全量克隆 | — | 是 | 维护者用；含完整历史 |
+
+三种方式装出来的 skill 目录**内容完全一致**（`zion-script` 17 文件／`zion-assets` 19／`zion-storyboard` 39／`zion-qa` 7）。
+
+机器可读的极简形态（供脚本调用，把 `<目标>` 换成实际安装目录）：
+
+```bash
+curl -sL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip \
+  && unzip -q zion.zip \
+  && cp -r zion-skills-main/zion-script zion-skills-main/zion-assets \
+            zion-skills-main/zion-storyboard zion-skills-main/zion-qa <目标>/
+```
+
+若环境是 WorkBuddy 或 Codex，也可在解压后的仓库里跑脚本（自动解析安装路径）：
+
+```bash
+python .workbuddy/tools/sync_skills.py --target workbuddy   # 或 --target codex
+```
+
+该脚本只支持这两个目标，其他环境走上面的手工复制。
 
 ### 3.2 手工安装（不给 agent 时）
 
-仓库地址：`https://gitee.com/ZionZhang/zion-skills.git`
+仓库地址：`https://gitee.com/ZionZhang/zion-skills.git`（公开，无需账号）
+
+不用 git 也行——下 zip 解压后的目录结构与克隆完全相同：
 
 ```bash
-git clone https://gitee.com/ZionZhang/zion-skills.git
-cd zion-skills
+curl -sL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
+unzip -q zion.zip && cd zion-skills-main
+```
 
+```bash
 # 装到 WorkBuddy（四个技能一起装）
 cp -r zion-script zion-assets zion-storyboard zion-qa ~/.workbuddy/skills/
 
@@ -88,18 +119,17 @@ cp -r zion-script zion-assets zion-storyboard zion-qa ~/.codex/skills/
 cp -r zion-storyboard ~/.workbuddy/skills/
 ```
 
+习惯用 git 的话，用 `git clone https://gitee.com/ZionZhang/zion-skills.git` 替代前两行即可（想省体积可加 `--depth 1`）。
+
 Windows（PowerShell）：
 
 ```powershell
-git clone https://gitee.com/ZionZhang/zion-skills.git
 Copy-Item -Recurse zion-script,zion-assets,zion-storyboard,zion-qa "$env:USERPROFILE\.workbuddy\skills\"
 ```
 
 装完**重启对应客户端**（WorkBuddy / Codex），否则新技能不会出现在选择器中。
 
-> 公开仓库，对方无需账号即可 `clone`。
-
-**分享出去的包是干净的**：技能目录里的 `_user_meta.json`（本机安装时间戳与来源）已从版本控制移除，对方安装时由客户端自行生成自己的那份。
+**分享出去的包是干净的**：技能目录里的 `_user_meta.json`（本机安装时间戳与来源）已从版本控制移除，归档与克隆副本都不含它，对方安装时由客户端自行生成自己的那份。
 
 ### 3.3 维护者本机同步
 
@@ -118,23 +148,30 @@ python .workbuddy/tools/sync_skills.py --dry                # 只报告差异
 - 手工安装等价于把某个技能目录整体复制到安装目录下，例如把 `zion-storyboard/` 复制为 `~/.workbuddy/skills/zion-storyboard/`。
 - 单独安装是受支持的用法：跨技能引用只写技能名与档名，不写相对路径；确为单独安装而有意双份的文件已在 `.workbuddy/tools/skill_lint.py` 的 `DECLARED_DUPES` 登记。
 
-### 3.5 后续更新的安装命令
+### 3.5 后续更新
 
-已安装的旧版本**不要覆盖 `SKILL.md` 就完事**——技能是一整个目录（`references/` 会增删、`tests/` 会更新），必须整体同步。推荐两种方式：
+已安装的旧版本**不要覆盖 `SKILL.md` 就完事**——技能是一整个目录（`references/` 会增删、`tests/` 会更新），必须整体同步。
+
+**没有 git 的环境（zip 路子）**——重新下载覆盖即可：
 
 ```bash
-# 方式一：在克隆下来的仓库里拉取更新后重新镜像（推荐，能拿到全部改动）
+curl -sL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip \
+  && unzip -q -o zion.zip \
+  && cp -r zion-skills-main/zion-script zion-skills-main/zion-assets \
+            zion-skills-main/zion-storyboard zion-skills-main/zion-qa <目标>/
+```
+
+**有 git 的环境**——拉取后重新镜像（能精确处理增删）：
+
+```bash
 cd zion-skills
 git pull
 python .workbuddy/tools/sync_skills.py --target workbuddy   # 缺失补齐、不同覆盖、源删的一并删
-
-# 方式二：没保留仓库时，重新克隆再覆盖（注意先备份自定义改动）
-git clone https://gitee.com/ZionZhang/zion-skills.git zion-skills-new
-cp -r zion-skills-new/zion-script zion-skills-new/zion-assets \
-      zion-skills-new/zion-storyboard zion-skills-new/zion-qa ~/.workbuddy/skills/
 ```
 
-更新后同样要重启客户端。**不要只 `git pull` 而不跑同步**——仓库更新与安装目录生效是两件事。
+也可以直接让对方的 agent 重跑 3.1 的提示词——它自带「已克隆过则更新」的分支。
+
+更新后同样要重启客户端。两个要点：**仓库更新 ≠ 安装目录生效**（必须重新拷贝或跑同步）；归档地址末尾是 `main`，若日后改用分支或标签，把这段换掉即可。
 
 ## 四、目录结构
 
