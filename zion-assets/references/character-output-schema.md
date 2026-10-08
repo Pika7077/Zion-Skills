@@ -147,7 +147,7 @@
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | hair | string | 发型描述（颜色、长度、造型） |
-| face | string | 面部特征（脸型、五官、皮肤状态） |
+| face | string | 面部特征（脸型、五官、皮肤状态）。**能写细就写细**——写「凤眼、颧弓略高、面部留白少」比写「五官精致」有用；只到形容词层级时须在 `extraction_notes` 标注易趋同（见 [人物提取规则](character-extraction-rules.md) §四） |
 | body_type | string | 体型描述 |
 | height | string | 身高或区间 |
 | skin_tone | string | 肤色 |
