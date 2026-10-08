@@ -541,6 +541,7 @@ $zion-qa
 - `parse_input.py` 在 `zion-assets` 与 `zion-storyboard` 各存一份，供各自单独安装；两份内容必须完全一致，由 `skill_lint.py` 的 DECLARED DUPLICATE 项校验。
 - 安装目标分别为 `~/.codex/skills` 与 `~/.workbuddy/skills`，各会话按工作区规程同步自己使用的安装目录。
 - **分享给他人**：仓库 `https://gitee.com/ZionZhang/zion-skills.git` 为公开仓库，对方 `git clone` 后把四个技能目录整体复制到上述安装目录即可；**最省事的做法是让对方的 agent 自己装**——把 `https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip` 与安装提示词发给它（模板见 [`README.md`](README.md) 第 3.1 节）。归档 zip 无需 git、约 900KB。
+- **跨 agent 通用**：技能用 `SKILL.md` 开放标准（Agent Skills），Claude Code／Codex／Cursor／ZCode／DeepSeek Harness 等读同一套格式，差异只在安装目录；`~/.agents/skills/` 是多数工具都扫的公约目录。已核实的目录清单见 [`README.md`](README.md) 第 3.1.1 节。
 - **更新已安装的旧版本**：在克隆目录里 `git pull` 后重跑同步（或重新克隆覆盖），**不要只覆盖 `SKILL.md`**——技能是一整个目录，`references/` 会增删。仓库更新与安装目录生效是两件事。
 - 安装后若新 Skill 未出现在选择器中，重启对应客户端（Codex / WorkBuddy）再检查。
 

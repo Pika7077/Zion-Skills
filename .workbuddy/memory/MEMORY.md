@@ -40,7 +40,11 @@
   - 选它的理由：体积省约 70%；**不依赖对方装 git**（很多 agent 环境能下载但没有 git）；包更干净。
   - 它的代价：升级时要**整体覆盖**，无法精确处理「源已删的文件」——需要精确增删时仍走 git + `sync_skills.py`。
   - **三种方式装出的目录内容完全一致**：script 17／assets 19／storyboard 39／qa 7 文件。
-- **把提示词直接发给对方的 agent**，让它自己装。模板在 `README.md` 第 3.1 节，可原样转发。
+- **把提示词直接发给对方的 agent**，让它自己装。模板在 `README.md` 第 3.1 节，可原样转发——**提示词已做成品牌无关**（不写死 agent 名，让对方的 agent 自己判断目录）。
+- **跨 agent 通用，唯一变量是安装目录**：技能用 `SKILL.md` 开放标准（Agent Skills，源自 Anthropic，已被 OpenAI／Microsoft／Cursor 等采纳）。已核实目录：Codex `~/.codex/skills/`、Claude Code `~/.claude/skills/`、Cursor `~/.cursor/skills/`、ZCode `~/.zcode/skills/`、DeepSeek Harness `$DSH_HOME/skills`。
+  - **`~/.agents/skills/` 是事实上的跨工具公约目录**（Cursor／ZCode／DSH 都扫）——不确定装哪时用它兜底；但它**不是每个工具都认**，能确认真实目录时优先真实目录。
+  - **装到 `~/.claude/skills/` 或 `~/.codex/skills/` 会被其他工具顺带认到**（Cursor 明确兼容读取这两处）——对方用多个工具时，这是「装一处、多处可用」的选择。
+  - 技能内容对 agent 假设很轻（不依赖特定工具名／子代理／权限模型，脚本是标准 Python），**迁移通常只需换目录、不需改内容**。
 - **手工安装**＝解压或克隆后把技能目录整体复制到安装目录（`~/.workbuddy/skills/` 或 `~/.codex/skills/`）。可四个一起装，也可只装一个（单独安装是受支持用法）。
 - **`sync_skills.py` 只支持 `--target codex|workbuddy`**（`TARGETS` 字典硬编码这两个）。写成 `--target <环境>` 这种泛化说法会让 Claude Code 用户报「未知目标」——**写指令时必须写明只覆盖这两个**，其他环境走手工复制。
 - **更新＝不要只覆盖 `SKILL.md`**。技能是一整个目录，`references/` 会增删。**仓库更新 ≠ 安装目录生效**，必须重新拷贝或跑同步。

@@ -44,7 +44,9 @@ zion-qa              投喂前检查与生成后验收
 
 ### 3.1 把仓库发给对方的 agent，让它自己装（推荐）
 
-如果对方也在用 agent（WorkBuddy / Codex / Claude Code 等），**不用教他敲命令**——把下面这一段原样发过去即可。对方的 agent 会自己下载、装到正确目录并验证。
+如果对方也在用 agent，**不用教他敲命令**——把下面这一段原样发过去即可。对方的 agent 会自己下载、找到自己的技能目录、装好并验证。
+
+> 提示词**不限定 agent 品牌**：技能用的是 `SKILL.md` 开放标准（Agent Skills），Claude Code / Codex / Cursor / Gemini CLI / Copilot / DeepSeek Harness / ZCode 等都读同一套格式。差异只在**发现目录**，而这一步交给对方的 agent 自己判断最准。
 
 ```text
 请帮我安装 Zion 技能家族（AIGC 短片/短剧的四段式技能包：剧本→资产→分镜→校验）。
@@ -52,21 +54,26 @@ zion-qa              投喂前检查与生成后验收
 下载地址（公开，无需账号）：
 https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
 
-包含四个技能目录：zion-script、zion-assets、zion-storyboard、zion-qa
+这是标准的 Agent Skills（SKILL.md 开放标准），包含四个技能目录：
+zion-script、zion-assets、zion-storyboard、zion-qa
 
 请按以下步骤操作：
 1. 下载上面的 zip 并解压到临时目录（约 900KB；若你的环境有 git，
    也可以 git clone https://gitee.com/ZionZhang/zion-skills.git）。
-2. 判断你自己的工作环境，把四个技能目录整体复制到对应的技能目录：
-   - WorkBuddy    → ~/.workbuddy/skills/
-   - Codex        → ~/.codex/skills/
-   - Claude Code  → ~/.claude/skills/
-   （Windows 下 ~ 指 %USERPROFILE%；不确定环境时先问我，不要猜）
-3. 整个目录一起装，不要只复制 SKILL.md——技能还包含 references/ 与 tests/ 子目录。
-4. 装完告诉我：装到哪个目录、四个技能是否都在、以及需要重启客户端才能生效。
+2. 先看你自己的技能目录在哪（常见位置，按你的实际环境判断）：
+   - WorkBuddy → ~/.workbuddy/skills/     Codex → ~/.codex/skills/
+   - Claude Code → ~/.claude/skills/      Cursor → ~/.cursor/skills/
+   - ZCode → ~/.zcode/skills/             DeepSeek Harness → $DSH_HOME/skills
+   - 跨工具公约目录（多数工具都扫）→ ~/.agents/skills/
+   若你的工具不在上面、或你也不确定，就装到 ~/.agents/skills/，
+   或先查你工具的文档确认技能目录再动手；不要猜。
+   （Windows 下 ~ 指 %USERPROFILE%）
+3. 把四个技能目录整体复制过去；若目标已有同名技能，先备份再覆盖。
+4. 整个目录一起装，不要只复制 SKILL.md——技能还包含 references/ 与 tests/ 子目录。
+5. 装完告诉我：装到哪个目录、四个技能是否都在、以及需要重启/刷新才能生效。
 ```
 
-对方回执后，**提醒他重启客户端**，技能才会出现在选择器里。
+对方回执后，**提醒他重启（或刷新）客户端**，技能才会出现在选择器里。
 
 **为什么用 zip 而不是 git**：归档包 892KB，浅克隆 3.0M（其中 808K 是 `.git`）；归档不含版本历史，也**不含 `_user_meta.json` 等本机元数据**；而且不依赖对方装 git——很多 agent 环境有网络下载能力但没有 git。
 
@@ -96,6 +103,27 @@ python .workbuddy/tools/sync_skills.py --target workbuddy   # 或 --target codex
 ```
 
 该脚本只支持这两个目标，其他环境走上面的手工复制。
+
+### 3.1.1 跨 agent 通用性
+
+技能本身**跨 agent 通用**，因为 `SKILL.md` 已是开放标准（Agent Skills，源自 Anthropic，现被 OpenAI、Microsoft、Cursor 等采纳）。**唯一需要按 agent 调整的是安装目录。** 已核实的目录：
+
+| Agent | 用户级技能目录 | 备注 |
+|---|---|---|
+| WorkBuddy | `~/.workbuddy/skills/` | 本项目维护者环境 |
+| Codex CLI | `~/.codex/skills/` | |
+| Claude Code | `~/.claude/skills/` | SKILL.md 标准的发源地 |
+| Cursor | `~/.cursor/skills/`、`~/.agents/skills/` | **兼容读取** `.claude/skills/` 与 `.codex/skills/` |
+| ZCode | `~/.zcode/skills/`、`~/.agents/skills/` | 内置「从外部 Agent 导入」，可直接扫 Claude Code / Codex 等目录 |
+| DeepSeek Harness | `$DSH_HOME/skills`、`~/.agents/skills/` | 也接受扁平 `<name>.md` 布局；支持 `references/`、`scripts/` |
+| Gemini CLI / Copilot 等 | 见各自文档 | 同属 Agent Skills 标准 |
+
+两条实用结论：
+
+- **`~/.agents/skills/` 是事实上的跨工具公约目录**（Cursor、ZCode、DeepSeek Harness 都扫它）。不确定装哪时，装这里命中率最高；但它**不是每个工具都认**，能确认真实目录时优先装真实目录。
+- **装到 `~/.claude/skills/` 或 `~/.codex/skills/`，不少其他工具会顺带认到**（Cursor 明确兼容读取这两处）。若对方同时用多个工具，这是"装一处、多处可用"的省事选择。
+
+技能内部对 agent 的**假设很轻**：不依赖特定工具名、不依赖子代理、不依赖特定权限模型；引用的脚本是标准 Python。因此跨 agent 迁移通常只需换目录，不需改内容。
 
 ### 3.2 手工安装（不给 agent 时）
 

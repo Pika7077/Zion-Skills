@@ -1,6 +1,6 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v5.6.3`** · 2026-10-08
+**当前版本：`v5.6.4`** · 2026-10-08
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
 
@@ -872,7 +872,7 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有结构调整或成体系吸收（有 → 第一位）；再看是不是新增参考档或"多个小改动同时"（是 → 第二位）；其余都动第三位。**补档不跳主版本**（2026-09-22 拍板）。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v5.6.3`，2026-10-08）
+## 当前规模（`v5.6.4`，2026-10-08）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
@@ -881,9 +881,19 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 | `zion-storyboard` | 33 | 342 |
 | `zion-qa` | 5 | 58 |
 
-校验状态（2026-10-08，`v5.6.3`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
+校验状态（2026-10-08，`v5.6.4`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
 
 ## 变更记录
+
+### `v5.6.4` · 2026-10-08 — 安装提示词改为品牌无关；补跨 agent 通用性说明
+
+用户问「除了提示词列出的三个 agent，DeepSeek Harness、ZCode 等是否也通用」。查证后确认通用，但原提示词把三个目录写死，会误导非这三个品牌的用户。
+
+- **`README.md` 3.1 节提示词改为品牌无关**：开头声明「技能用 `SKILL.md` 开放标准（Agent Skills）」，安装目录从「三个写死」改为「常见位置清单 + 通用兜底」——新增 Cursor（`~/.cursor/skills/`）、ZCode（`~/.zcode/skills/`）、DeepSeek Harness（`$DSH_HOME/skills`）与**跨工具公约目录 `~/.agents/skills/`**；并写明「工具不在列表或不确定时，装到 `~/.agents/skills/` 或先查文档再动手，不要猜」。新增第 3 步「目标已有同名技能先备份再覆盖」。
+- **新增 3.1.1 节「跨 agent 通用性」**：说明为什么通用（`SKILL.md` 为开放标准，源自 Anthropic，已被 OpenAI／Microsoft／Cursor 等采纳），唯一需按 agent 调整的是安装目录；给出七个 agent 的已核实目录表；两条实用结论——**`~/.agents/skills/` 是事实上的跨工具公约目录**（Cursor／ZCode／DSH 都扫），**装到 `~/.claude/skills/` 或 `~/.codex/skills/` 会被其他工具顺带认到**（Cursor 明确兼容读取）；并说明技能内部对 agent 假设很轻（不依赖特定工具名／子代理／权限模型，脚本为标准 Python），迁移通常只需换目录。
+- **手册十四章**补一条跨 agent 通用性指针。
+- **查证来源**：Cursor 官方文档（技能目录与兼容读取规则）、ZCode 官方文档（`~/.zcode/skills/`、外部 Agent 导入）、DeepSeek Harness 文档（六个 ranked 目录，含 `~/.agents/skills`）、Agent Skills 标准说明（跨 Claude Code／Codex／Gemini CLI／Copilot）。
+- 校验：`skill_lint.py` → files=86 problems=0；**无技能内容改动**。
 
 ### `v5.6.3` · 2026-10-08 — 改用归档 zip 作为首选安装方式
 
