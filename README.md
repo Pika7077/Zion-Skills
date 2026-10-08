@@ -47,6 +47,8 @@ zion-qa              投喂前检查与生成后验收
 如果对方也在用 agent，**不用教他敲命令**——把下面这一段原样发过去即可。对方的 agent 会自己下载、找到自己的技能目录、装好并验证。
 
 > 提示词**不限定 agent 品牌**：技能用的是 `SKILL.md` 开放标准（Agent Skills），Claude Code / Codex / Cursor / Gemini CLI / Copilot / DeepSeek Harness / ZCode 等都读同一套格式。差异只在**发现目录**，而这一步交给对方的 agent 自己判断最准。
+>
+> **第 0 步环境自检是必要的，不是客套**：同一段提示词既可能发给别人的机器（该装），也可能贴回**作者机**（已装、且往往比归档新）。少了这一步，agent 会照着步骤硬覆盖，把工作区未提交的改动冲掉。自检让 agent 先分清「全新安装 / 覆盖更新 / 只验证」三种情况再动手。
 
 ```text
 请帮我安装 Zion 技能家族（AIGC 短片/短剧的四段式技能包：剧本→资产→分镜→校验）。
@@ -58,6 +60,23 @@ https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
 zion-script、zion-assets、zion-storyboard、zion-qa
 
 请按以下步骤操作：
+
+第 0 步 · 先做环境自检，把结果告诉我，再决定是否继续：
+  a. 你自己的工作环境是什么？（WorkBuddy / Codex / Claude Code / Cursor /
+     ZCode / DeepSeek Harness / 其他）你的技能目录在哪？怎么确定的？
+  b. 这四个技能是否已经装过？逐个查 SKILL.md 是否存在。若有，报告
+     每个技能的目录文件数与最后修改时间。
+     注意：技能文件里不写版本号，别去 frontmatter 找。判断新旧请
+     用「与解压出的源逐文件比对」或「比对 references/ 下的档名集合」。
+  c. 自检结论：
+     - 未装过 → 按下面步骤全新安装。
+     - 已装且与源有差异（且本机不是开发机）→ 覆盖更新，覆盖前先备份。
+     - 已装且与源一致 → 不要覆盖，只做验证并报告。
+     若本机就是这些技能的开发机（存在 .workbuddy/tools/ 与 CHANGELOG.md），
+     一律不要覆盖——本地很可能比归档新，覆盖会冲掉未提交的改动。
+
+确认后再继续：
+
 1. 下载上面的 zip 并解压到临时目录（约 900KB；若你的环境有 git，
    也可以 git clone https://gitee.com/ZionZhang/zion-skills.git）。
 2. 先看你自己的技能目录在哪（常见位置，按你的实际环境判断）：
@@ -70,7 +89,9 @@ zion-script、zion-assets、zion-storyboard、zion-qa
    （Windows 下 ~ 指 %USERPROFILE%）
 3. 把四个技能目录整体复制过去；若目标已有同名技能，先备份再覆盖。
 4. 整个目录一起装，不要只复制 SKILL.md——技能还包含 references/ 与 tests/ 子目录。
-5. 装完告诉我：装到哪个目录、四个技能是否都在、以及需要重启/刷新才能生效。
+5. 验证并汇报：四个技能的 SKILL.md 是否都在、文件数是否与解压出的源一致、
+   以及需要重启/刷新才能生效。若你的环境能跑 Python，可执行
+   `python -B <技能>/tests/` 下的回归脚本作为额外验证。
 ```
 
 对方回执后，**提醒他重启（或刷新）客户端**，技能才会出现在选择器里。
