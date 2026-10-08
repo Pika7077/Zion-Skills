@@ -1,6 +1,6 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v5.7.0`** · 2026-10-08
+**当前版本：`v5.7.1`** · 2026-10-08
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
 
@@ -872,7 +872,7 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有结构调整或成体系吸收（有 → 第一位）；再看是不是新增参考档或"多个小改动同时"（是 → 第二位）；其余都动第三位。**补档不跳主版本**（2026-09-22 拍板）。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v5.7.0`，2026-10-08）
+## 当前规模（`v5.7.1`，2026-10-08）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
@@ -881,9 +881,27 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 | `zion-storyboard` | 33 | 342 |
 | `zion-qa` | 5 | 58 |
 
-校验状态（2026-10-08，`v5.7.0`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
+校验状态（2026-10-08，`v5.7.1`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
 
 ## 变更记录
+
+### `v5.7.1` · 2026-10-08 — 归档下载须跟随跳转；交付版本以 commit 为准
+
+由一次**真实的外部安装反馈**驱动（对方 agent 报「zip 地址返回 Gitee 登录页」）。实测复盘后确认：**仓库与归档都是公开的，URL 也没错；真正的坑是归档地址返回 302 跳转**，不跟随跳转的客户端会把 302 的响应体（一个 46KB 的 HTML 页面）当成下载结果。
+
+**实测结论（均有命令输出为证）**：
+
+- `.../repository/archive/main.zip` → `HTTP/1.1 302 Found` + `Location: .../blazearchive/main.zip?Expires=...&Signature=...`，**302 响应自身的 `Content-Type` 就是 `text/html; charset=utf-8`**，体积与对方描述的 46KB HTML 吻合。
+- **干净 HOME、无登录态、无凭据**的环境下，跟随跳转取归档 → 913KB 真 zip（`PK` 魔数）；匿名 `git ls-remote` → 正常读到 HEAD。因此「拿到 HTML」**不等于「仓库匿名归档被关了」**——这条错误推断已被实测证伪。
+- 顺带确认对方报的 `HEAD = d65d065` 是**推送 v5.7.0 之前**的版本（现远端为 `fde4197`），属时序问题而非内容问题。
+
+**改动**：
+
+- `README.md` §3.1 提示词：下载段由「单条 zip 地址」改为**方式 A（归档）+ 方式 B（clone）并列**，写明 302 跳转与「拿到 HTML 就换 clone、不要反复重试」；并新增**报版本用 commit SHA 而非 vX.Y.Z**（技能目录不写版本号，commit 是唯一版本锚点）。
+- `README.md` §3.1 表格与说明：新增引注块记录 302 跳转这个坑与两条实测结论；`§3.2`、`§3.5` 的 zip 命令处补「`-L` 不能省」。
+- `Zion技能使用手册.md` 第十四章「分享给他人」：补 302 跳转提示与 clone 兜底。
+
+**版本判定**：只改根级文档的安装说明措辞，未新增参考档、未动技能内容与结构 → 动第三位。
 
 ### `v5.7.0` · 2026-10-08 — 冲击与情绪镜头的可复述画幅；读取量不是切镜间隔
 

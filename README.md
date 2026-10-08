@@ -53,11 +53,27 @@ zion-qa              投喂前检查与生成后验收
 ```text
 请帮我安装 Zion 技能家族（AIGC 短片/短剧的四段式技能包：剧本→资产→分镜→校验）。
 
-下载地址（公开，无需账号）：
-https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
+仓库地址（公开，无需账号）：
+https://gitee.com/ZionZhang/zion-skills
+
+取包方式二选一，优先用方式 A；若归档下载失败（比如拿到的是一个 HTML
+页面而不是 zip），直接改用方式 B，不要卡在这里反复重试。
+
+  方式 A · 下载归档 zip（约 900KB，不需要 git）：
+    https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
+    注意：这个地址会返回 302 跳转到 CDN。请确保你的下载方式跟随跳转
+    （curl 用 `-L`，wget 默认跟随，下载库要开 allow_redirects）。
+    若拿到的是 HTML 而不是 zip，就是没跟跳转——换方式 B。
+
+  方式 B · 克隆仓库（需要 git，浅克隆约 3.0M）：
+    git clone --depth 1 https://gitee.com/ZionZhang/zion-skills.git
 
 这是标准的 Agent Skills（SKILL.md 开放标准），包含四个技能目录：
 zion-script、zion-assets、zion-storyboard、zion-qa
+
+报版本时请用 commit SHA（`git rev-parse --short HEAD`，或用归档的下载
+时间），不要报「vX.Y.Z」，因为技能目录里不写版本号，唯一的版本锚点是
+commit。这也能让我判断你拿到的是不是最新。
 
 请按以下步骤操作：
 
@@ -77,8 +93,8 @@ zion-script、zion-assets、zion-storyboard、zion-qa
 
 确认后再继续：
 
-1. 下载上面的 zip 并解压到临时目录（约 900KB；若你的环境有 git，
-   也可以 git clone https://gitee.com/ZionZhang/zion-skills.git）。
+1. 按上面的方式 A 或方式 B 取包，解压/克隆到临时目录。
+   方式 A 解压后顶层目录名形如 zion-skills-main/；方式 B 就是仓库根目录。
 2. 先看你自己的技能目录在哪（常见位置，按你的实际环境判断）：
    - WorkBuddy → ~/.workbuddy/skills/     Codex → ~/.codex/skills/
    - Claude Code → ~/.claude/skills/      Cursor → ~/.cursor/skills/
@@ -90,20 +106,27 @@ zion-script、zion-assets、zion-storyboard、zion-qa
 3. 把四个技能目录整体复制过去；若目标已有同名技能，先备份再覆盖。
 4. 整个目录一起装，不要只复制 SKILL.md——技能还包含 references/ 与 tests/ 子目录。
 5. 验证并汇报：四个技能的 SKILL.md 是否都在、文件数是否与解压出的源一致、
-   以及需要重启/刷新才能生效。若你的环境能跑 Python，可执行
-   `python -B <技能>/tests/` 下的回归脚本作为额外验证。
+   你拿到的 commit SHA（git 路子）或归档下载时间、以及需要重启/刷新才能生效。
+   若你的环境能跑 Python，可执行 `python -B <技能>/tests/` 下的回归脚本
+   作为额外验证。
 ```
 
 对方回执后，**提醒他重启（或刷新）客户端**，技能才会出现在选择器里。
 
-**为什么用 zip 而不是 git**：归档包 892KB，浅克隆 3.0M（其中 808K 是 `.git`）；归档不含版本历史，也**不含 `_user_meta.json` 等本机元数据**；而且不依赖对方装 git——很多 agent 环境有网络下载能力但没有 git。
+**为什么优先 zip 而不是 git**：归档包 892KB，浅克隆 3.0M（其中 808K 是 `.git`）；归档不含版本历史，也**不含 `_user_meta.json` 等本机元数据**；而且不依赖对方装 git——很多 agent 环境有网络下载能力但没有 git。
+
+> **归档地址是 302 跳转，不是直链**（2026-10-08 实测踩坑，务必注意）：`.../repository/archive/main.zip` 会返回 `302 Found` + `Location: .../blazearchive/main.zip?Expires=...&Signature=...`，**响应体是一个 46KB 的 HTML 页面**。不跟随跳转的客户端会把这段 HTML 当成下载结果保存下来，表现为「下到的不是 zip 而是登录页/HTML」（实测 DeepSeek Harness 就踩了这个坑）。
+>
+> 正确用法是**跟随跳转**：`curl -sL`、`wget`（默认跟随）、任意下载库开 `allow_redirects`/`follow_redirects`。若不确定，直接改用 git clone 那条路。
+>
+> 补充两条实测结论，避免误判：**仓库与归档都是公开的**——干净 HOME、无登录态、无凭据的环境下，归档能正常下到 913KB 真 zip，匿名 `git ls-remote` 也能读到 HEAD；所以拿到 HTML **不代表「仓库匿名归档被关了」**，只是跳转没跟上。
 
 **实测过的三种取包方式**（可直接转述给对方）：
 
 | 方式 | 体积 | 需要 git | 说明 |
 |---|---:|---|---|
-| **zip 归档**（推荐） | 892KB | 否 | `curl -sL -o zion.zip <归档地址>` 后解压，顶层即四个技能 |
-| 浅克隆 | 3.0M | 是 | `git clone --depth 1`，要长期跟随更新时用 |
+| **zip 归档**（首选） | 892KB | 否 | `curl -sL -o zion.zip <归档地址>` 后解压，顶层即四个技能。**`-L` 必须有** |
+| 浅克隆（备选） | 3.0M | 是 | `git clone --depth 1`，要长期跟随更新时用；归档失败时的兜底 |
 | 全量克隆 | — | 是 | 维护者用；含完整历史 |
 
 三种方式装出来的 skill 目录**内容完全一致**（`zion-script` 17 文件／`zion-assets` 19／`zion-storyboard` 39／`zion-qa` 7）。
@@ -157,6 +180,8 @@ curl -sL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/
 unzip -q zion.zip && cd zion-skills-main
 ```
 
+> `-L`（跟随 302 跳转）不能省。省了会下到一个 46KB 的 HTML 页面而不是 zip。归档失败就改走 `git clone --depth 1`，见 §3.1 的说明。
+
 ```bash
 # 装到 WorkBuddy（四个技能一起装）
 cp -r zion-script zion-assets zion-storyboard zion-qa ~/.workbuddy/skills/
@@ -201,7 +226,7 @@ python .workbuddy/tools/sync_skills.py --dry                # 只报告差异
 
 已安装的旧版本**不要覆盖 `SKILL.md` 就完事**——技能是一整个目录（`references/` 会增删、`tests/` 会更新），必须整体同步。
 
-**没有 git 的环境（zip 路子）**——重新下载覆盖即可：
+**没有 git 的环境（zip 路子）**——重新下载覆盖即可（`-L` 必须保留，否则下到的是 HTML 跳转页）：
 
 ```bash
 curl -sL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip \

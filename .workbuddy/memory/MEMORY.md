@@ -143,6 +143,16 @@ lint 只查 Markdown 链接、标题锚点与 `§x` 引用，**不查「八种�
 
   `git` 在 `mingw64/bin`；`ls`／`tail`／`head`／`diff`／`wc` 在 **`usr/bin`**——两处都要加，只加前者会使 coreutils 报 command not found。
 
+## 对外分发的两个坑（2026-10-08 实测建立）
+
+一次真实外部反馈（对方 agent 报「zip 地址返回 Gitee 登录页」）复盘出的两条硬经验：
+
+- **归档地址是 302 跳转，不是直链。** `.../repository/archive/main.zip` 返回 `302 Found` + `Location: .../blazearchive/main.zip?Expires=...&Signature=...`，**而 302 响应自身的 `Content-Type` 就是 `text/html`**（约 46KB）。不跟随跳转的客户端会把这段 HTML 当下载结果存下来。**下载必须跟跳转**：`curl -L`、`wget` 默认跟随、下载库开 `allow_redirects`。给对方写安装说明时，zip 与 clone 要**并列给出**，并写明「拿到 HTML 就换 clone、别反复重试」。
+
+- **「拿到 HTML」≠「仓库匿名归档被关了」。** 干净 HOME／无登录态／无凭据环境下实测：归档能下到 913KB 真 zip（`PK` 魔数），匿名 `git ls-remote` 也能读到 HEAD —— 仓库与归档都是公开的。**推断仓库可见性要实测，不能从「某个客户端拿不到」反推**（此前已有一次「从推送需要凭据反推仓库私有」的错误，同源）。
+
+- **报版本用 commit SHA，不要用 `vX.Y.Z`。** 技能目录不写版本号（本库硬规则），commit 是唯一版本锚点。对方报 `HEAD = d65d065` 是很有效的定位信息；若要求报 `vX.Y.Z` 会让对方空找。
+
 ## 目录约定
 
 - 工作区为唯一源：`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa` + `Zion技能使用手册.md`。
