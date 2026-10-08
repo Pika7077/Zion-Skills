@@ -32,6 +32,21 @@
 4. **在安装副本上重跑两组回归**（`python -B zion-assets/tests/test_extract_characters.py`、`python -B zion-storyboard/tests/test_storyboard_audit.py`）——工作区绿不等于装机可用，路径与打包差异要在这里暴露。
 5. **元数据用 Python 显式 UTF-8 读一次**，确认解码合法、无 BOM、LF。**bash 里 `head`／`grep` 看 SKILL.md 中文会显示乱码，那是 Windows 终端 GBK 显示问题，不是文件损坏**——别据此判定装机失败。
 
+## 对外分发：分享给他人（2026-10-08 建立）
+
+仓库 `https://gitee.com/ZionZhang/zion-skills.git`（**私有**，需先在 Gitee 把对方加为仓库成员，否则 clone 认证失败）。
+
+- **安装＝克隆后把技能目录整体复制到安装目录**（`~/.workbuddy/skills/` 或 `~/.codex/skills/`）。可四个一起装，也可只装一个（单独安装是受支持用法）。
+- **更新＝不要只覆盖 `SKILL.md`**。技能是一整个目录，`references/` 会增删。正确做法：在克隆目录 `git pull` 后重跑 `sync_skills.py --target <目标>`，或重新克隆整体覆盖。**仓库更新 ≠ 安装目录生效**，这是两件事。
+- **装完／更新后必须重启客户端**（WorkBuddy / Codex），否则新技能不进选择器。
+- 完整命令写在 `README.md` 第三章（4 小节：分享安装／本机同步／通用规则／更新）。手册十四章只留指针。
+
+### `_user_meta.json` 不随仓库分发（2026-10-08 修正）
+
+它是**客户端在本机安装时生成**的元数据：`{name, installedAt, source}`（`installedAt` 为时间戳，`source=userImport`），随机器而异。此前被纳入版本控制（四技能各 1 + 归档副本 4 = 8 份），已 `git rm --cached` 移除并加入 `.gitignore`（规则 `_user_meta.json` 与 `zion-*/_user_meta.json`），**本地文件保留**。对方克隆后由客户端自行生成自己的那份。
+
+新增仓库级文件时先自问：**这是内容还是本机状态**？状态类（安装时间戳、锁、缓存、路径）一律忽略，不进分发包。
+
 ## 并发写入：已发生的两起事故（2026-09-20）
 
 - `zion-script/references/12-visual-style-and-grading.md` 被另一会话整篇替换（170 行词库版 → 35 行“剧本阶段锁定视觉事实”版），我的改动被覆盖。

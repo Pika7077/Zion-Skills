@@ -40,6 +40,41 @@ zion-qa              投喂前检查与生成后验收
 
 ## 三、安装与同步
 
+分两种场景：**维护者本机同步**（你自己改完往外镜像）与**分享给他人安装**（对方只取用，不改）。
+
+### 3.1 分享给他人：克隆后安装
+
+仓库地址：`https://gitee.com/ZionZhang/zion-skills.git`
+
+```bash
+git clone https://gitee.com/ZionZhang/zion-skills.git
+cd zion-skills
+
+# 装到 WorkBuddy（四个技能一起装）
+cp -r zion-script zion-assets zion-storyboard zion-qa ~/.workbuddy/skills/
+
+# 或装到 Codex
+cp -r zion-script zion-assets zion-storyboard zion-qa ~/.codex/skills/
+
+# 只装其中一个也可以（例如只做分镜）
+cp -r zion-storyboard ~/.workbuddy/skills/
+```
+
+Windows（PowerShell）：
+
+```powershell
+git clone https://gitee.com/ZionZhang/zion-skills.git
+Copy-Item -Recurse zion-script,zion-assets,zion-storyboard,zion-qa "$env:USERPROFILE\.workbuddy\skills\"
+```
+
+装完**重启对应客户端**（WorkBuddy / Codex），否则新技能不会出现在选择器中。
+
+> 仓库为私有：请在 Gitee 仓库「管理 → 仓库成员管理」把对方加为成员，否则 `clone` 无法通过认证。
+
+**分享出去的包是干净的**：技能目录里的 `_user_meta.json`（本机安装时间戳与来源）已从版本控制移除，对方安装时由客户端自行生成自己的那份。
+
+### 3.2 维护者本机同步
+
 **本工作区是唯一真相源，安装目录只写不改。** 技能改动一律先在工作区完成，再镜像出去。
 
 ```bash
@@ -48,9 +83,30 @@ python .workbuddy/tools/sync_skills.py --target workbuddy   # 同步到 ~/.workb
 python .workbuddy/tools/sync_skills.py --dry                # 只报告差异
 ```
 
-手工安装等价于把某个技能目录整体复制到安装目录下，例如把 `zion-storyboard/` 复制为 `~/.workbuddy/skills/zion-storyboard/`。
+克隆本仓库后同样可直接跑这个脚本，等价于上面的手工复制。
 
-单独安装是受支持的用法：跨技能引用只写技能名与档名，不写相对路径；确为单独安装而有意双份的文件已在 `.workbuddy/tools/skill_lint.py` 的 `DECLARED_DUPES` 登记。
+### 3.3 两条通用规则
+
+- 手工安装等价于把某个技能目录整体复制到安装目录下，例如把 `zion-storyboard/` 复制为 `~/.workbuddy/skills/zion-storyboard/`。
+- 单独安装是受支持的用法：跨技能引用只写技能名与档名，不写相对路径；确为单独安装而有意双份的文件已在 `.workbuddy/tools/skill_lint.py` 的 `DECLARED_DUPES` 登记。
+
+### 3.4 后续更新的安装命令
+
+已安装的旧版本**不要覆盖 `SKILL.md` 就完事**——技能是一整个目录（`references/` 会增删、`tests/` 会更新），必须整体同步。推荐两种方式：
+
+```bash
+# 方式一：在克隆下来的仓库里拉取更新后重新镜像（推荐，能拿到全部改动）
+cd zion-skills
+git pull
+python .workbuddy/tools/sync_skills.py --target workbuddy   # 缺失补齐、不同覆盖、源删的一并删
+
+# 方式二：没保留仓库时，重新克隆再覆盖（注意先备份自定义改动）
+git clone https://gitee.com/ZionZhang/zion-skills.git zion-skills-new
+cp -r zion-skills-new/zion-script zion-skills-new/zion-assets \
+      zion-skills-new/zion-storyboard zion-skills-new/zion-qa ~/.workbuddy/skills/
+```
+
+更新后同样要重启客户端。**不要只 `git pull` 而不跑同步**——仓库更新与安装目录生效是两件事。
 
 ## 四、目录结构
 
