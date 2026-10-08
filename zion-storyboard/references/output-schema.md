@@ -8,6 +8,8 @@
 
 正式导演稿每镜写：时间、景别 `framing`、运镜 `camera_movement`（固定也明写）、光线 `lighting`、画面过程、必要物理反馈、声音/对白、切点与连续状态。`lighting` 写本镜可见的光源方向、主体明暗或阴影结果；同场共享设定可简写，但不能只填“同上”或空值，变化时写出变化。画面中确实无物理互动时不硬填。人物位置与朝向写进各镜的画面过程，不另立空间板块或顶层空间字段。
 
+镜头时间承载从起始状态到可见结果的实际过程：先算动作、反馈、读取与反应哪些并行、哪些串行，再定起止时间。能在同一镜读清的连续过程不因阶段数多而拆镜；切镜须有观察或信息任务。生成提示词保留镜内的关键先后与最终画面，不得把 `description` 和 `physical_feedback` 缩成“推开文件”“物件震动”等标签。
+
 JSON 保留旧字段。下表明确字段用途；`lighting` 在正式导演稿中必填，其他字段遵循各自说明：
 
 | 字段 | 用途 |
@@ -28,14 +30,14 @@ JSON 保留旧字段。下表明确字段用途；`lighting` 在正式导演稿�
 | shots[].camera_angle | 镜头朝向或滚转：平拍 / 仰拍 / 俯拍 / 鸟瞰 / 虫视 / 斜角（荷兰角）等；与高度分开记录 |
 | shots[].lighting | 本镜可见光线：主导光源与方向、主体明暗或阴影结果；沿用场次灯光时简述实际效果，不能只写“同上” |
 | shots[].new_feedback | 可见变化、新信息或有意义的等待；每镜填写并人工评审 |
-| shots[].physical_feedback | 具体物理因果、反馈与末态；适用时填写 |
+| shots[].physical_feedback | 具体物理因果、反馈与末态；受力时记录支点、接触部位与方向、可见失衡/位移/形变及停止原因，按景别与动作强度取舍 |
 | shots[].continuity_in / continuity_out | 位置、持物、动作阶段等入/出状态；本组末镜的 `continuity_out` 即下一组的起手依据，跨组接缝见 [跨生成组的接缝](30-segment-joining.md) |
 | shots[].cut_motivation | 切换观察对象的理由；单镜可写“持续观察” |
 | shots[].transition_out | 可选；写向下一镜的切换机制、触发时点及 A 末帧/B 首帧锚点。镜内揭示不填成跨镜转场；规则见 [剪辑与转场](22-editing-and-transitions.md) |
 | shots[].addition_note | 原文依据或导演补充说明，不进入生成块 |
 | shots[].camera_move_triplet | 主动运镜的 origin/direction/stop_result；固定可省略 |
 | shots[].internal_beats | 可选；一镜到底或复杂长镜头的内部时间阶段。阶段共享同一 `shot_number`，记录时间、主体/焦点、摄影机路径和新增信息，不作为独立切镜 |
-| shots[].generation_prompt | 目标模型的生成指令；纯导演稿可空。旧数据的 `seedance_prompt` 仍可读取 |
+| shots[].generation_prompt | 目标模型的生成指令；独立写出本镜起始空间关系、关键动作及物理反馈的可见先后、落幅与必要声音；有情绪任务时写出造成情绪的空间/关系变化，细节随风险增减。纯导演稿可空，旧数据的 `seedance_prompt` 仍可读取 |
 | shots[].post_plan | 可选；需要后期时记录具体目的、所需层、可替换区域、余量和降级路径，不写泛泛“后期优化” |
 | shots[].deliverable_variants | 可选；当前镜头涉及的画幅、语言、字幕、声音或内容版本及差异 |
 | shots[].accessibility_notes | 可选；无声理解、非颜色单通道、闪烁风险或字幕可读性的项目级处理与待验证项 |
