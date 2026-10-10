@@ -44,7 +44,7 @@
 | 场面调度：三段结构、调度还是切镜、摄影机与主体的四种关系（跟/等/迎/让）、走位四变量、调度因果、AI 落地（另含调度素材的跨档索引） | `zion-storyboard/references/34-staging-and-blocking.md` |
 | 后期可救性与合成交接：有效覆盖、头尾余量、clean plate、分层、组接修复边界、缩放裁切/调色匹配/插入镜/水平翻转的后期边界、替换与降级路径 | `zion-storyboard/references/37-post-and-recovery.md` |
 | 无障碍、本地化与最终交付的前期设计（字幕、无声观看、非颜色单通道、闪烁风险、多平台版本矩阵） | `zion-storyboard/references/38-accessibility-localization-delivery.md` |
-| 声音设计：逐轨录音/生成路径、场景声景基线、**三层功能（基础／叙事／情感）的齐缺与取舍**、动态听觉前后景、客观/心理声场、J-cut/L-cut、对白语气位与画外声 | `zion-storyboard/references/15-audio-and-lipsync.md` |
+| 声音设计：逐轨录音/生成路径、场景声景基线、**三层功能（基础／叙事／情感）的齐缺与取舍**、动态听觉前后景、客观/心理声场、J-cut/L-cut、对白语气位与画外声、**角色音色设定（`voice_profiles`，取自 `zion-assets` 的声音身份）** | `zion-storyboard/references/15-audio-and-lipsync.md` |
 | 提示词可执行性：主体锚定与单主体句、指代归属、具象判据、**详略由风险决定**、正向优先于否定、**画面内文字三需求**、示例句来源纪律 | `zion-storyboard/references/12-prompt-hygiene.md` |
 | 可选视频模型 MiniMax H3（字段集、时长、素材上限、映射与边界） | `zion-storyboard/references/16-minimax-h3-adapter.md` |
 | 动作强度分档 R1/R2/R3 | `zion-storyboard/references/action-choreography-rules.md` |

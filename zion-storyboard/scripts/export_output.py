@@ -304,6 +304,12 @@ def generate_markdown(data: dict) -> str:
     # 标题
     md.append(f"# {source_name} 分镜脚本\n")
 
+    # 情境概况（生成组级前言，不进入生成块）
+    scenario_brief = data.get('scenario_brief')
+    if scenario_brief:
+        text = scenario_brief if isinstance(scenario_brief, str) else str(scenario_brief)
+        md.extend(["## 情境概况\n", text + "\n"])
+
     # 基本信息
     md.append("## 基本信息\n")
     if meta.get('source'):
