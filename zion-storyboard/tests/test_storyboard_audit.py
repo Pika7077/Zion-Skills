@@ -270,6 +270,14 @@ class Regression(unittest.TestCase):
             p.write_text(json.dumps(d), encoding='utf-8')
             self.assertNotEqual(subprocess.run(cmd, capture_output=True).returncode, 0)
 
+    def test_no_shot_time_hides_timecodes(self):
+        d = fixture()
+        with_time = generate_markdown(d)
+        without = generate_markdown(d, show_shot_time=False)
+        self.assertIn('### 镜头1（0-10秒）：特写', with_time)
+        self.assertIn('### 镜头1：特写', without)
+        self.assertNotIn('（0-10秒）', without)
+
 
 if __name__=='__main__':
     unittest.main()

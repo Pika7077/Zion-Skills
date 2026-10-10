@@ -290,8 +290,11 @@ def format_time_range(shot: dict) -> str:
     return f"{start}-{end}秒"
 
 
-def generate_markdown(data: dict) -> str:
-    """将分镜数据生成为格式化 Markdown"""
+def generate_markdown(data: dict, show_shot_time: bool = True) -> str:
+    """将分镜数据生成为格式化 Markdown。
+
+    show_shot_time=False 时镜行标题不含逐镜时间码；time_range 仍用于结构校验与配平。
+    """
     meta = data.get('meta', {})
     scene = data.get('scene_analysis', {})
     rhythm = data.get('rhythm_map', {})
@@ -463,7 +466,8 @@ def generate_markdown(data: dict) -> str:
             pov_label = f"{pov} {pov_name}".strip()
         else:
             pov_label = pov
-        heading = f"### 镜头{n}（{tr}）：{framing}"
+        heading = (f"### 镜头{n}（{tr}）：{framing}" if show_shot_time
+                   else f"### 镜头{n}：{framing}")
         if pov_label:
             heading += f" ｜ {pov_label}"
         md.append(heading + "\n")
@@ -568,7 +572,8 @@ def generate_markdown(data: dict) -> str:
         for shot, prompt in prompts:
             tr = format_time_range(shot)
             n = shot.get('shot_number', '?')
-            md.append(f"镜头{n}（{tr}）：{prompt}")
+            md.append(f"镜头{n}（{tr}）：{prompt}" if show_shot_time
+                      else f"镜头{n}：{prompt}")
 
         if data.get('constraints'):
             md.append(f"约束：{data['constraints']}")
@@ -593,7 +598,7 @@ def generate_markdown(data: dict) -> str:
     return '\n'.join(md)
 
 
-def generate_batch_markdown(results: list) -> str:
+def generate_batch_markdown(results: list, show_shot_time: bool = True) -> str:
     """将多个分镜结果合并为一个 Markdown"""
     parts = []
     for i, result in enumerate(results):
@@ -604,7 +609,7 @@ def generate_batch_markdown(results: list) -> str:
             data = result.get('data', result)
             data['meta'] = data.get('meta', {})
             data['meta']['source_file'] = file_name
-            parts.append(generate_markdown(data))
+            parts.append(generate_markdown(data, show_shot_time=show_shot_time))
             parts.append("\n---\n")
     return '\n'.join(parts)
 
@@ -631,12 +636,12 @@ def export_json(data, output_path: str = None) -> str:
     return json_str
 
 
-def export_markdown(data, output_path: str = None) -> str:
-    """导出为 Markdown"""
+def export_markdown(data, output_path: str = None, show_shot_time: bool = True) -> str:
+    """导出为 Markdown；show_shot_time=False 时隐藏逐镜时间码。"""
     if isinstance(data, list):
-        md_str = generate_batch_markdown(data)
+        md_str = generate_batch_markdown(data, show_shot_time=show_shot_time)
     else:
-        md_str = generate_markdown(data)
+        md_str = generate_markdown(data, show_shot_time=show_shot_time)
 
     if output_path:
         with open(output_path, 'w', encoding='utf-8') as f:
@@ -659,6 +664,8 @@ def main():
                         help='结构、时间与容量检查；艺术质量须人工复核')
     parser.add_argument('--fidelity', action='store_true',
                         help='仅检查时间、容量和连续状态；不替代源文比对')
+    parser.add_argument('--no-shot-time', action='store_true',
+                        help='隐藏逐镜时间码，只保留整段/整组时长')
 
     args = parser.parse_args()
 
@@ -752,7 +759,8 @@ def main():
     if args.format == 'json':
         result_str = export_json(data, args.output)
     else:
-        result_str = export_markdown(data, args.output)
+        result_str = export_markdown(data, args.output,
+                                     show_shot_time=not args.no_shot_time)
 
     if not args.output:
         print(result_str)

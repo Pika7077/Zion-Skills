@@ -1,6 +1,6 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v5.9.0`** · 2026-10-10
+**当前版本：`v5.9.1`** · 2026-10-10
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
 
@@ -872,18 +872,29 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有结构调整或成体系吸收（有 → 第一位）；再看是不是新增参考档或"多个小改动同时"（是 → 第二位）；其余都动第三位。**补档不跳主版本**（2026-09-22 拍板）。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v5.9.0`，2026-10-10）
+## 当前规模（`v5.9.1`，2026-10-10）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
 | `zion-script` | 15 | 102 |
 | `zion-assets` | 14 | 108 |
-| `zion-storyboard` | 33 | 344 |
+| `zion-storyboard` | 33 | 345 |
 | `zion-qa` | 5 | 58 |
 
-校验状态（2026-10-10，`v5.9.0`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 33 项全绿（assets 5 + storyboard 28）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
+校验状态（2026-10-10，`v5.9.1`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 34 项全绿（assets 5 + storyboard 29）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
 
 ## 变更记录
+
+### `v5.9.1` · 2026-10-10 — 导出可隐藏逐镜时间码
+
+用户在分镜实操中两次强调“每个分镜不需要时长控制”，理由说得很清楚：**写死每镜时长会限制模型发挥**。此前只能事后手工剥掉秒数，现给 `export_output.py` 加 `--no-shot-time`：
+
+- 镜行标题与「完整提示词」区块都不再带逐镜时间码（`镜头1：景别`／`镜头1：提示词`）。
+- 逐镜 `time_range` 仍在 JSON 内参与结构校验与配平——对白容量、切点与整段预算的判断照做——只是不作为交付内容出现；整段／整组总时长照常给出。
+- **接线**：`SKILL.md` 导出命令补一行并说明；`output-schema.md` 的 `time_range` 处补“必须保留，但不必出现在交付稿里”。
+- **回归**：人工案例加 345；脚本测试加 1 项（`show_shot_time=False` 时标题与生成块都不含时间码）。该项首次运行即**抓到真 bug**：开关起初只改了镜行标题，「完整提示词」区块仍带时间码——已一并纳入开关。storyboard 自动测试 28 → 29。
+
+**版本判定**：单一导出选项的小增补，未新增参考档、未改判据 → 动第三位。
 
 ### `v5.9.0` · 2026-10-10 — 生成组级情境概况与角色音色设定进入输出契约
 

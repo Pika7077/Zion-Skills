@@ -87,7 +87,10 @@ description: 把已有剧本或大纲转成制作级导演分镜、画幅适配�
 python scripts/export_output.py input.json --validate
 python scripts/export_output.py input.json --audit
 python scripts/export_output.py input.json --format markdown --output output.md
+python scripts/export_output.py input.json --format markdown --no-shot-time --output output.md
 ```
+
+加 `--no-shot-time` 时镜行标题不含逐镜时间码，只保留整段/整组时长；逐镜时间仍在 JSON 里参与校验与配平，不作为交付内容出现。
 
 脚本通过只代表结构检查通过，不等于艺术质量或生成验证。输入文档或视频需要预处理时可运行 `python scripts/parse_input.py <file>`。
 
