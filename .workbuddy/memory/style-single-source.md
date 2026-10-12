@@ -64,6 +64,7 @@
 | 可生成性对剧本的约束：要素取舍、同场人数、动物与儿童、高风险场面、画面内文字、一致性负担、风险标注 | `zion-script/references/21-script-generatability.md` |
 | 改动后复验：局部验证／联动检查／全量复核 | `zion-qa/references/qa-change-reverification.md` |
 | 按交付物选择的验收矩阵（剧本／资产／导演分镜的表达验收分组／提示词／图片视频结果／技术交付／来源证据）与**批量风险分层抽样** | `zion-qa/references/qa-artifact-rubrics.md` |
+| 剧本**开场与连载**的验收问法（观看理由按功能查、切口被接与轮换、集间三张表） | `zion-qa/references/qa-artifact-rubrics.md` §一；**判据本身**属 `zion-script`（13／14 号档），本处只列问法 |
 | 观众盲读判据：理解障碍分类、暗示是否兑现、情绪是否有可见变化支撑 | `zion-qa/references/qa-blind-read.md` |
 | 投喂前检查判据：明确冲突、时间容量、状态继承、生成风险与 FAIL/WARN/INFO 准备度 | `zion-qa/references/qa-feedability.md` |
 | 生成结果处置判据：Keep/Fix in post/Edit/Re-roll/Rewrite、`reject_reason` 受控词表与**判定时机分层（生成前／生成后／成片后）** | `zion-qa/references/qa-result-acceptance.md` |
