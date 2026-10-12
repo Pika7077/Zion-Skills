@@ -19,7 +19,7 @@
 | 成像响应（胶片颗粒／宽容度／印片黑位与色彩密度） | `zion-assets/references/film-and-print-stocks.md` |
 | 非人物/场景资产（生物、载具、武器、图形文字、特效、声音身份的结构与交接） | `zion-assets/references/other-asset-design.md` |
 | 外部素材来源、权利状态与允许用途登记（只追踪证据，不作法律结论） | `zion-assets/references/source-and-rights.md` |
-| 数字机身、焦段透视逻辑、镜头与光圈、调色词库与八种调色预设、可选 60:30:10 配色、风格锚点、Anti-Slop 替换表、Register Poles | `zion-storyboard/references/13-camera-and-texture.md` §二／§六 |
+| 数字机身、焦段透视逻辑、镜头与光圈、调色词库与八种调色预设、可选 60:30:10 配色、风格锚点、**从参考图反推项目级风格层的五维（色彩／光影／材质／对比度／镜头质感）**、Anti-Slop 替换表、Register Poles | `zion-storyboard/references/13-camera-and-texture.md` §二／§六 |
 | 镜头语言：景别与观看位置、**不用脸承载情绪（局部特写与背面，含四种理由）**、建立镜的空间任务、深焦/选择性焦点、短长镜头、具名运镜的可执行路径 | `zion-storyboard/references/camera-vocabulary.md` |
 | 导演决策标准：镜头目的先于拍法、不使用的绝对规则（景别/角度/运镜/特写没有默认配额） | `zion-storyboard/references/directing-policy.md` |
 | 关系构图：七个可控要素、关系→取景语法、站位与画面分区、视线、人物与场景构成 | `zion-storyboard/references/21-relationship-composition.md` |

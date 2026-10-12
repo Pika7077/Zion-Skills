@@ -1,6 +1,6 @@
 # Zion 技能家族 · 版本与变更记录
 
-**当前版本：`v5.9.2`** · 2026-10-12
+**当前版本：`v6.0.0`** · 2026-10-12
 
 V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyboard` / `zion-qa`）。本文件只记版本号与变更沿革，不重复流程（流程见 [AGENTS.md](AGENTS.md)）与用法（用法见 [Zion技能使用手册.md](Zion技能使用手册.md)）。
 
@@ -872,18 +872,29 @@ V2 自「四技能定名」起算（`zion-script` / `zion-assets` / `zion-storyb
 
 判断顺序：先看有没有结构调整或成体系吸收（有 → 第一位）；再看是不是新增参考档或"多个小改动同时"（是 → 第二位）；其余都动第三位。**补档不跳主版本**（2026-09-22 拍板）。版本号只在本文件与对话中声明，**不写进各技能的 SKILL.md 与参考档**。
 
-## 当前规模（`v5.9.2`，2026-10-12）
+## 当前规模（`v6.0.0`，2026-10-12）
 
 | 技能 | 参考档 | 回归用例 |
 |---|---:|---:|
 | `zion-script` | 15 | 102 |
-| `zion-assets` | 14 | 108 |
-| `zion-storyboard` | 33 | 345 |
+| `zion-assets` | 14 | 109 |
+| `zion-storyboard` | 33 | 347 |
 | `zion-qa` | 5 | 60 |
 
-校验状态（2026-10-12，`v5.9.2`）：`skill_lint.py` → files=86 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS）；脚本回归 34 项全绿（assets 5 + storyboard 29）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
+校验状态（2026-10-12，`v6.0.0`）：`skill_lint.py` → files=82 problems=0（无 JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS；克隆工作树内测，维护者本机含客户端生成的 `_user_meta.json` ×4 时计 86）；脚本回归 34 项全绿（assets 5 + storyboard 29）；Skill 基本验证器因本机 Python 缺少 PyYAML 未执行，frontmatter 与直链由 lint 检查；技能文件内无版本号。
 
 ## 变更记录
+
+### `v6.0.0` · 2026-10-12 — 三处通用补充（外部 V3.0 技能包对照）
+
+用户投喂一份外部「AI 影视导演分镜 Skill V3.0」（3 文件约 2.5KB，主体是模板与全局禁止项），问库内能否补充。逐条对照 14 条实质条目：11 条已覆盖且更细，2 条属口径差异，净增量 3 处；用户回复"推送，版本更新为 v6"。
+
+- `zion-storyboard/references/12-prompt-hygiene.md`：负面清单栏与「画面内文字」三需求表补上**非剧情叠加文字**一档——身份字卡／标题字卡／台标／非剧情 UI 显式入负面清单，并写明它们不适用"必须被读到／只需看出那里有文字／不需要"三档，也不因"观众好认"放行。
+- `zion-storyboard/references/13-camera-and-texture.md` 新增 §6.7：**从参考图反推项目级风格层**的五维（色彩／光影／材质／对比度／镜头质感），并明确**不默认套用旧项目（旧片、旧系列）已用的 LUT 或风格层**；反推结果落成"一次设定、整组复用"的项目级风格层，不在每镜复述。
+- `zion-assets/references/other-asset-design.md` 声音身份补 **呼吸习惯**（气口位置、换气声轻重与是否可闻、紧张时的屏息或浅促倾向）；`zion-storyboard/references/output-schema.md` 的 `voice_profiles` 稳定特征枚举同步，避免契约与声音身份档不一致。呼吸属跨台词稳定的特征，单句气口仍归台词语气位。
+- 归属登记：`.workbuddy/memory/style-single-source.md` 的 13 号档条目补"从参考图反推项目级风格层的五维"。
+- 回归：storyboard 345 → 347（新增 346 非剧情叠加文字、347 风格层反推）；assets 108 → 109（新增 109 呼吸习惯）。参考档数不变（script 15／assets 14／storyboard 33／qa 5）。
+- **未吸收**：该包把"视频 ≤30 秒""只给整体时长、单镜不强制时间码"当作规则，本库已有 `--no-shot-time` 与模型预算上限，不重复；其硬禁 BGM／字幕的口径差异属项目规格，不进技能本体；"MJ V8.2 视觉反推"的固定搭配按图像引擎档已有的"MJ 仅在显式要求时启用"处理，不写死引擎。
 
 ### `v5.9.2` · 2026-10-12 — 验收矩阵补「开场与连载」栏
 
