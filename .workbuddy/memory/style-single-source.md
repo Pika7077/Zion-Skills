@@ -35,7 +35,7 @@
 | 剪辑逻辑：30°/180°、视觉变化量三测、极端两级跳档、动势匹配、单镜读取时长、心理时间、切点与动作阶段、3:7 出接动作、跳剪、判断权次序、视线落点承接、反应镜头 | `zion-storyboard/references/29-cut-logic-and-timing.md` |
 | 不匹配素材：连续性故障与有意断裂的区分、六类不匹配矩阵、调和→桥接→注意力转移→重做的取舍次序、水平翻转闸门 | 同上（29 号档） |
 | 转场：三层边界（同场切镜／场次转场／序列分隔）、三类重新定位条件、连贯/分隔双功能、六类手段与两端锚点、**同比例构图转场（图形匹配）四法＋并排判据＋前期预设** | `zion-storyboard/references/22-editing-and-transitions.md` |
-| 跨生成组接缝：末态具体化、接缝换机位、空镜三用法 | `zion-storyboard/references/30-segment-joining.md` |
+| 跨生成组接缝：末态具体化、接缝换机位、空镜三用法、计划末态与已验收成片末态分开及接续修正边界 | `zion-storyboard/references/30-segment-joining.md` |
 | 跨时空转场：镜内／镜间两族、时间关系三分、切换可察觉性判据、可生成性分级 | `zion-storyboard/references/31-cross-time-transition.md` |
 | 蒙太奇段落：两种目的、意义来自组合与顺序（换序判据）、减法/加法、四种功能 × 四种关系、分屏同时信息、闪切与实现路径、隐喻陷阱、**象征替代（三类任务、两道闸门：关联性与可读性）**、**重复累积（节奏型／景别型／隐性三型与上限）** | `zion-storyboard/references/32-montage-sequences.md` |
 | 主观性与 POV：视点归属与漂移、身体局部入画与位置稳定、在场感三件套、提示词写法（按可见事实而非术语）、情感物、**客观与主观的组合任务（每处切换须有观众所得；关系张力用互相的主观／过肩内反拍；先客观场域再主观进入）**、人称选择、声音次序、主观状态标记、不可靠叙述的公平条件 | `zion-storyboard/references/33-subjectivity-and-pov.md` |
@@ -47,7 +47,7 @@
 | 声音设计：逐轨录音/生成路径、场景声景基线、**三层功能（基础／叙事／情感）的齐缺与取舍**、动态听觉前后景、客观/心理声场、J-cut/L-cut、对白语气位与画外声、**角色音色设定（`voice_profiles`，取自 `zion-assets` 的声音身份）** | `zion-storyboard/references/15-audio-and-lipsync.md` |
 | 提示词可执行性：主体锚定与单主体句、指代归属、具象判据、**详略由风险决定**、正向优先于否定、**画面内文字三需求**、示例句来源纪律 | `zion-storyboard/references/12-prompt-hygiene.md` |
 | 可选视频模型 MiniMax H3（字段集、时长、素材上限、映射与边界） | `zion-storyboard/references/16-minimax-h3-adapter.md` |
-| 动作强度分档 R1/R2/R3 | `zion-storyboard/references/action-choreography-rules.md` |
+| 动作强度分档 R1/R2/R3、主体/摄影机/播放速度分开、相对运动参照与关键接触可读性 | `zion-storyboard/references/action-choreography-rules.md` |
 | 张力分布检查（波峰波谷，不用分值模型）／冲突的构造（四要素、去台词检验、升级、立场、空间参与、**两难困境**）／结局四形态与收束纪律 | `zion-script/references/03-story-requirements.md` |
 | 剧本阶段的视觉事实锁定：风格与色彩在剧本层只定事实、不写制作参数 | `zion-script/references/12-visual-style-and-grading.md` |
 | 面部动作编码（FACS）与表情分解参考 | `zion-script/references/facs-reference.md` |
