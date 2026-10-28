@@ -40,274 +40,84 @@ zion-qa              投喂前检查与生成后验收
 
 ## 三、安装与同步
 
-分三种场景：**发给对方的 agent 自行安装**（最省事，对方不用敲命令）、**分享给他人手工安装**、**维护者本机同步**（你自己改完往外镜像）。
+安装、更新、目标目录和验证步骤统一在本节维护。四个技能可一起安装，也可单独取用；始终复制完整技能目录。
 
-### 3.1 把仓库发给对方的 agent，让它自己装（推荐）
+### 3.1 交给 agent 安装
 
-如果对方也在用 agent，**不用教他敲命令**——把下面这一段原样发过去即可。对方的 agent 会自己下载、找到自己的技能目录、装好并验证。
-
-> 提示词**不限定 agent 品牌**：技能用的是 `SKILL.md` 开放标准（Agent Skills），Claude Code / Codex / Cursor / Gemini CLI / Copilot / DeepSeek Harness / ZCode 等都读同一套格式。差异只在**发现目录**，而这一步交给对方的 agent 自己判断最准。
->
-> **第 0 步环境自检是必要的，不是客套**：同一段提示词既可能发给别人的机器（该装），也可能贴回**作者机**（已装、且往往比归档新）。少了这一步，agent 会照着步骤硬覆盖，把工作区未提交的改动冲掉。自检让 agent 先分清「全新安装 / 覆盖更新 / 只验证」三种情况再动手。
+把下面的提示词发给使用者的 agent：
 
 ```text
-请帮我安装 Zion 技能家族（AIGC 短片/短剧的四段式技能包：剧本→资产→分镜→校验）。
+请安装 Zion 技能家族：zion-script、zion-assets、zion-storyboard、zion-qa。
+仓库：https://gitee.com/ZionZhang/zion-skills
 
-仓库地址（公开，无需账号）：
-https://gitee.com/ZionZhang/zion-skills
+先检查当前环境、实际技能目录和已有安装。若这是开发工作区（有
+.workbuddy/tools/ 和 CHANGELOG.md），不要用下载副本覆盖本地源文件。
+已安装且与源一致时只验证；有差异时先备份，再更新安装副本。
 
-取包方式二选一，优先用方式 A；若归档下载失败（比如拿到的是一个 HTML
-页面而不是 zip），直接改用方式 B，不要卡在这里反复重试。
+取包到临时目录，任选一种：
+  curl -fL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
+  git clone --depth 1 https://gitee.com/ZionZhang/zion-skills.git
+归档下载后检查是否为有效 ZIP；失败则用 git，不反复下载同一错误页面。
 
-  方式 A · 下载归档 zip（约 900KB，不需要 git）：
-    https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
-    注意：这个地址会返回 302 跳转到 CDN。请确保你的下载方式跟随跳转
-    （curl 用 `-L`，wget 默认跟随，下载库要开 allow_redirects）。
-    若拿到的是 HTML 而不是 zip，就是没跟跳转——换方式 B。
-
-  方式 B · 克隆仓库（需要 git，浅克隆约 3.0M）：
-    git clone --depth 1 https://gitee.com/ZionZhang/zion-skills.git
-
-这是标准的 Agent Skills（SKILL.md 开放标准），包含四个技能目录：
-zion-script、zion-assets、zion-storyboard、zion-qa
-
-报版本时请用 commit SHA（`git rev-parse --short HEAD`，或用归档的下载
-时间），不要报「vX.Y.Z」，因为技能目录里不写版本号，唯一的版本锚点是
-commit。这也能让我判断你拿到的是不是最新。
-
-请按以下步骤操作：
-
-第 0 步 · 先做环境自检，把结果告诉我，再决定是否继续：
-  a. 你自己的工作环境是什么？（WorkBuddy / Codex / Claude Code / Cursor /
-     ZCode / DeepSeek Harness / 其他）你的技能目录在哪？怎么确定的？
-  b. 这四个技能是否已经装过？逐个查 SKILL.md 是否存在。若有，报告
-     每个技能的目录文件数与最后修改时间。
-     注意：技能文件里不写版本号，别去 frontmatter 找。判断新旧请
-     用「与解压出的源逐文件比对」或「比对 references/ 下的档名集合」。
-  c. 自检结论：
-     - 未装过 → 按下面步骤全新安装。
-     - 已装且与源有差异（且本机不是开发机）→ 覆盖更新，覆盖前先备份。
-     - 已装且与源一致 → 不要覆盖，只做验证并报告。
-     若本机就是这些技能的开发机（存在 .workbuddy/tools/ 与 CHANGELOG.md），
-     一律不要覆盖——本地很可能比归档新，覆盖会冲掉未提交的改动。
-
-确认后再继续：
-
-1. 按上面的方式 A 或方式 B 取包，解压/克隆到临时目录。
-   方式 A 解压后顶层目录名形如 zion-skills-main/；方式 B 就是仓库根目录。
-2. 先看你自己的技能目录在哪（常见位置，按你的实际环境判断）：
-   - WorkBuddy → ~/.workbuddy/skills/     Codex → ~/.codex/skills/
-   - Claude Code → ~/.claude/skills/      Cursor → ~/.cursor/skills/
-   - ZCode → ~/.zcode/skills/             DeepSeek Harness → $DSH_HOME/skills
-   - 跨工具公约目录（多数工具都扫）→ ~/.agents/skills/
-   若你的工具不在上面、或你也不确定，就装到 ~/.agents/skills/，
-   或先查你工具的文档确认技能目录再动手；不要猜。
-   （Windows 下 ~ 指 %USERPROFILE%）
-3. 把四个技能目录整体复制过去；若目标已有同名技能，先备份再覆盖。
-4. 整个目录一起装，不要只复制 SKILL.md——技能还包含 references/ 与 tests/ 子目录。
-5. 验证并汇报：四个技能的 SKILL.md 是否都在、文件数是否与解压出的源一致、
-   你拿到的 commit SHA（git 路子）或归档下载时间、以及需要重启/刷新才能生效。
-   若你的环境能跑 Python，可执行 `python -B <技能>/tests/` 下的回归脚本
-   作为额外验证。
+确认当前工具实际扫描的技能目录，再复制所需技能的完整目录。
+更新时替换整个技能目录，清理源中已删除的旧文件；保留备份，勿清理其他技能。
+验证 SKILL.md、文件集合与内容均与源一致。若能运行 Python，再运行所装
+技能的自动回归。汇报验证结果、commit SHA（归档则报下载时间）与生效方式。
 ```
 
-对方回执后，**提醒他重启（或刷新）客户端**，技能才会出现在选择器里。
+### 3.1.1 目标目录
 
-**为什么优先 zip 而不是 git**：归档包 892KB，浅克隆 3.0M（其中 808K 是 `.git`）；归档不含版本历史，也**不含 `_user_meta.json` 等本机元数据**；而且不依赖对方装 git——很多 agent 环境有网络下载能力但没有 git。
+| 环境 | 本仓库使用的目录 |
+|---|---|
+| Codex | `~/.codex/skills/` |
+| WorkBuddy | `~/.workbuddy/skills/` |
+| 其他 agent | 以该工具的实际配置或官方文档为准，不猜测兼容目录 |
 
-> **归档地址是 302 跳转，不是直链**（2026-10-08 实测踩坑，务必注意）：`.../repository/archive/main.zip` 会返回 `302 Found` + `Location: .../blazearchive/main.zip?Expires=...&Signature=...`，**响应体是一个 46KB 的 HTML 页面**。不跟随跳转的客户端会把这段 HTML 当成下载结果保存下来，表现为「下到的不是 zip 而是登录页/HTML」（实测 DeepSeek Harness 就踩了这个坑）。
->
-> 正确用法是**跟随跳转**：`curl -sL`、`wget`（默认跟随）、任意下载库开 `allow_redirects`/`follow_redirects`。若不确定，直接改用 git clone 那条路。
->
-> 补充两条实测结论，避免误判：**仓库与归档都是公开的**——干净 HOME、无登录态、无凭据的环境下，归档能正常下到 913KB 真 zip，匿名 `git ls-remote` 也能读到 HEAD；所以拿到 HTML **不代表「仓库匿名归档被关了」**，只是跳转没跟上。
+Windows 下 `~` 对应用户目录。技能采用 `SKILL.md` 格式，但发现目录与刷新方式由各工具决定。
 
-**实测过的三种取包方式**（可直接转述给对方）：
+### 3.2 手工安装与更新
 
-| 方式 | 体积 | 需要 git | 说明 |
-|---|---:|---|---|
-| **zip 归档**（首选） | 892KB | 否 | `curl -sL -o zion.zip <归档地址>` 后解压，顶层即四个技能。**`-L` 必须有** |
-| 浅克隆（备选） | 3.0M | 是 | `git clone --depth 1`，要长期跟随更新时用；归档失败时的兜底 |
-| 全量克隆 | — | 是 | 维护者用；含完整历史 |
-
-三种方式装出来的 skill 目录**内容完全一致**（`zion-script` 17 文件／`zion-assets` 19／`zion-storyboard` 39／`zion-qa` 7）。
-
-机器可读的极简形态（供脚本调用，把 `<目标>` 换成实际安装目录）：
-
-```bash
-curl -sL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip \
-  && unzip -q zion.zip \
-  && cp -r zion-skills-main/zion-script zion-skills-main/zion-assets \
-            zion-skills-main/zion-storyboard zion-skills-main/zion-qa <目标>/
-```
-
-若环境是 WorkBuddy 或 Codex，也可在解压后的仓库里跑脚本（自动解析安装路径）：
-
-```bash
-python .workbuddy/tools/sync_skills.py --target workbuddy   # 或 --target codex
-```
-
-该脚本只支持这两个目标，其他环境走上面的手工复制。
-
-### 3.1.1 跨 agent 通用性
-
-技能本身**跨 agent 通用**，因为 `SKILL.md` 已是开放标准（Agent Skills，源自 Anthropic，现被 OpenAI、Microsoft、Cursor 等采纳）。**唯一需要按 agent 调整的是安装目录。** 已核实的目录：
-
-| Agent | 用户级技能目录 | 备注 |
-|---|---|---|
-| WorkBuddy | `~/.workbuddy/skills/` | 本项目维护者环境 |
-| Codex CLI | `~/.codex/skills/` | |
-| Claude Code | `~/.claude/skills/` | SKILL.md 标准的发源地 |
-| Cursor | `~/.cursor/skills/`、`~/.agents/skills/` | **兼容读取** `.claude/skills/` 与 `.codex/skills/` |
-| ZCode | `~/.zcode/skills/`、`~/.agents/skills/` | 内置「从外部 Agent 导入」，可直接扫 Claude Code / Codex 等目录 |
-| DeepSeek Harness | `$DSH_HOME/skills`、`~/.agents/skills/` | 也接受扁平 `<name>.md` 布局；支持 `references/`、`scripts/` |
-| Gemini CLI / Copilot 等 | 见各自文档 | 同属 Agent Skills 标准 |
-
-两条实用结论：
-
-- **`~/.agents/skills/` 是事实上的跨工具公约目录**（Cursor、ZCode、DeepSeek Harness 都扫它）。不确定装哪时，装这里命中率最高；但它**不是每个工具都认**，能确认真实目录时优先装真实目录。
-- **装到 `~/.claude/skills/` 或 `~/.codex/skills/`，不少其他工具会顺带认到**（Cursor 明确兼容读取这两处）。若对方同时用多个工具，这是"装一处、多处可用"的省事选择。
-
-技能内部对 agent 的**假设很轻**：不依赖特定工具名、不依赖子代理、不依赖特定权限模型；引用的脚本是标准 Python。因此跨 agent 迁移通常只需换目录，不需改内容。
-
-### 3.2 手工安装（不给 agent 时）
-
-仓库地址：`https://gitee.com/ZionZhang/zion-skills.git`（公开，无需账号）
-
-不用 git 也行——下 zip 解压后的目录结构与克隆完全相同：
-
-```bash
-curl -sL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
-unzip -q zion.zip && cd zion-skills-main
-```
-
-> `-L`（跟随 302 跳转）不能省。省了会下到一个 46KB 的 HTML 页面而不是 zip。归档失败就改走 `git clone --depth 1`，见 §3.1 的说明。
-
-```bash
-# 装到 WorkBuddy（四个技能一起装）
-cp -r zion-script zion-assets zion-storyboard zion-qa ~/.workbuddy/skills/
-
-# 或装到 Codex
-cp -r zion-script zion-assets zion-storyboard zion-qa ~/.codex/skills/
-
-# 只装其中一个也可以（例如只做分镜）
-cp -r zion-storyboard ~/.workbuddy/skills/
-```
-
-习惯用 git 的话，用 `git clone https://gitee.com/ZionZhang/zion-skills.git` 替代前两行即可（想省体积可加 `--depth 1`）。
-
-Windows（PowerShell）：
+按上面的命令取包后，把所需目录复制到目标，例如：
 
 ```powershell
 Copy-Item -Recurse zion-script,zion-assets,zion-storyboard,zion-qa "$env:USERPROFILE\.workbuddy\skills\"
 ```
 
-装完**重启对应客户端**（WorkBuddy / Codex），否则新技能不会出现在选择器中。
+首次安装先确保目标父目录存在。更新前备份旧技能，然后替换完整目录；仅把新文件覆盖进去会留下已删除的旧参考档。不要只复制 `SKILL.md`。
 
-**分享出去的包是干净的**：技能目录里的 `_user_meta.json`（本机安装时间戳与来源）已从版本控制移除，归档与克隆副本都不含它，对方安装时由客户端自行生成自己的那份。
+`curl -L` 用于跟随归档地址的跳转；拿到 HTML 时先检查跳转和响应，不据此推断仓库是否公开。包大小、文件数随版本变化，验证以本次下载的源为准。
 
-### 3.3 维护者本机同步
+### 3.3 维护者同步与验证
 
-**本工作区是唯一真相源，安装目录只写不改。** 技能改动一律先在工作区完成，再镜像出去。
-
-```bash
-python .workbuddy/tools/sync_skills.py --target codex       # 同步到 ~/.codex/skills
-python .workbuddy/tools/sync_skills.py --target workbuddy   # 同步到 ~/.workbuddy/skills
-python .workbuddy/tools/sync_skills.py --dry                # 只报告差异
-```
-
-克隆本仓库后同样可直接跑这个脚本，等价于上面的手工复制。
-
-### 3.4 两条通用规则
-
-- 手工安装等价于把某个技能目录整体复制到安装目录下，例如把 `zion-storyboard/` 复制为 `~/.workbuddy/skills/zion-storyboard/`。
-- 单独安装是受支持的用法：跨技能引用只写技能名与档名，不写相对路径；确为单独安装而有意双份的文件已在 `.workbuddy/tools/skill_lint.py` 的 `DECLARED_DUPES` 登记。
-
-### 3.5 后续更新
-
-已安装的旧版本**不要覆盖 `SKILL.md` 就完事**——技能是一整个目录（`references/` 会增删、`tests/` 会更新），必须整体同步。
-
-**没有 git 的环境（zip 路子）**——重新下载覆盖即可（`-L` 必须保留，否则下到的是 HTML 跳转页）：
+在开发工作区修改源文件，按 [AGENTS.md](AGENTS.md) 校验后同步**已有**安装目录：
 
 ```bash
-curl -sL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip \
-  && unzip -q -o zion.zip \
-  && cp -r zion-skills-main/zion-script zion-skills-main/zion-assets \
-            zion-skills-main/zion-storyboard zion-skills-main/zion-qa <目标>/
+python .workbuddy/tools/sync_skills.py --target codex
+python .workbuddy/tools/sync_skills.py --target codex --dry
 ```
 
-**有 git 的环境**——拉取后重新镜像（能精确处理增删）：
+WorkBuddy 把目标换为 `workbuddy`；脚本只支持这两个目标，目标不存在时会跳过，首次安装用上面的目录复制。镜像会补齐、覆盖并删除源中已移除的文件；包括本机生成的 `_user_meta.json`，客户端会重新生成自己的元数据。
 
-```bash
-cd zion-skills
-git pull
-python .workbuddy/tools/sync_skills.py --target workbuddy   # 缺失补齐、不同覆盖、源删的一并删
-```
+验证：
 
-也可以直接让对方的 agent 重跑 3.1 的提示词——它自带「已克隆过则更新」的分支。
+1. 四个（或选装的）技能入口存在；逐文件比较内容与文件集合，排除 Python 缓存和客户端生成的元数据。
+2. 同步后的 `--dry` 应为 `added=0 updated=0 removed=0`；在安装副本运行对应自动回归。
+3. 检查入口文本为 UTF-8、无 BOM、LF。Windows 终端乱码先检查终端编码，不直接判定文件损坏。
+4. 记录源 commit SHA 或归档下载时间。仓库更新后还需更新安装副本；客户端未发现新技能时按其要求刷新或重新打开。
 
-更新后同样要重启客户端。两个要点：**仓库更新 ≠ 安装目录生效**（必须重新拷贝或跑同步）；归档地址末尾是 `main`，若日后改用分支或标签，把这段换掉即可。
+## 四、目录与文档
 
-## 四、目录结构
-
-```text
-.
-├── zion-script/            # 剧本技能
-│   ├── SKILL.md            #   入口：职责边界、流程、参考档路由
-│   ├── references/         #   参考档（按需加载）
-│   └── tests/              #   人工回归用例
-├── zion-assets/            # 资产技能（另有 scripts/ 提取脚本）
-├── zion-storyboard/        # 分镜技能（另有 scripts/ 解析与审计脚本）
-├── zion-qa/                # 校验技能
-├── Zion技能使用手册.md      # 用法：各技能适合做什么、怎么调用
-├── AGENTS.md               # 协作与维护流程（流程唯一来源）
-├── CHANGELOG.md            # 版本号、变更沿革与当前规模
-└── .workbuddy/
-    ├── tools/              # skill_lint.py / skill_guard.py / sync_skills.py
-    ├── memory/             # 长期约定、内容归属地图、材料吸收规则
-    └── archive/            # 删除与替换前的归档
-```
-
-每个技能的 `SKILL.md` 是入口，参考档按需加载；`references/` 内的档名编号只用于路由，不代表阅读顺序。
-
-## 五、维护工具
-
-改动技能前后用这三件套（用法见各自 docstring）：
-
-| 工具 | 作用 | 常用命令 |
-|---|---|---|
-| `skill_lint.py` | 内容校验：JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS | `python .workbuddy/tools/skill_lint.py`（须 0 问题） |
-| `skill_guard.py` | 并发守卫：写租约与基线快照 | `status` / `acquire` / `snapshot` / `check` / `release` |
-| `sync_skills.py` | 镜像到安装目录 | `--target codex\|workbuddy`、`--dry` |
-
-收工校验（完整循环见 [AGENTS.md](AGENTS.md)）：
-
-```bash
-python .workbuddy/tools/skill_lint.py
-python -B zion-assets/tests/test_extract_characters.py
-python -B zion-storyboard/tests/test_storyboard_audit.py
-python .workbuddy/tools/skill_guard.py check
-```
-
-各技能的 `tests/manual-regression.md` 记录需要人工复核的用例，与上面两个脚本同属收工动作。
-
-## 六、协作约定
-
-本仓库由 codex 与 WorkBuddy 两个会话同时维护：
-
-- 同一技能同时只让一个会话写。动手前 `skill_guard.py acquire` 领租约、`snapshot` 拍基线，收工前 `check` 看有无他人改动，最后 `release`。
-- 工作区是唯一源；codex 只同步 `~/.codex/skills`，WorkBuddy 只同步 `~/.workbuddy/skills`。
-- 删除文件先归档到 `.workbuddy/archive/`，再同步。
-- 换行符一律 LF（由 `.gitattributes` 统一，`core.autocrlf=false`）；新写或改写文件后须确认，混合换行会造成假漂移告警。
-- 一次逻辑改动一次提交，提交信息写清技能、改动与版本号。
-
-## 七、文档
-
-| 文档 | 内容 |
+| 位置 | 内容与读取时机 |
 |---|---|
-| [Zion技能使用手册.md](Zion技能使用手册.md) | 每个技能适合做什么、如何调用、常见任务怎么走 |
-| [AGENTS.md](AGENTS.md) | 标准循环、硬规则、清理纪律与维护契约 |
-| [CHANGELOG.md](CHANGELOG.md) | 当前版本、变更沿革、规模快照 |
-| `.workbuddy/memory/style-single-source.md` | 风格／色彩／镜头／声音等内容各归哪一档 |
-| `.workbuddy/memory/material-intake.md` | 外部学习材料如何判归属、如何判该不该吸收 |
+| 四个 `zion-*/SKILL.md` | 技能入口；仅按当前任务加载相关参考档 |
+| 各技能 `references/`、`scripts/`、`tests/` | 详细判据、工具和回归资料；目录随技能完整分发 |
+| [Zion技能使用手册.md](Zion技能使用手册.md) | 调用示例、任务路由与交付说明 |
+| [AGENTS.md](AGENTS.md) | 维护流程、并发规则与提交条件的唯一来源 |
+| [CHANGELOG.md](CHANGELOG.md) | 当前版本、规模、验证状态与本轮变化 |
+| `.workbuddy/tools/` | lint、并发守卫、安装镜像；参数见各脚本 docstring |
+| `.workbuddy/memory/MEMORY.md` | 长期事实与已知限制 |
+| `.workbuddy/memory/style-single-source.md` | 内容归属地图 |
+| `.workbuddy/memory/material-intake.md` | 外部材料的吸收规则 |
+| [.workbuddy/archive/README.md](.workbuddy/archive/README.md) | 历史记录索引；仅回溯具体问题时读取 |
 
-版本号只在 `CHANGELOG.md` 与对话中声明，不写进技能文件。
+参考档编号用于路由，不是阅读顺序。维护步骤按 AGENTS 执行，不在本入口重复；版本规则在 CHANGELOG 维护，技能正文不写版本号。

@@ -1,6 +1,6 @@
 # Zion 技能使用手册
 
-版本日期：2026-10-15
+版本日期：2026-10-28
 技能结构：剧本 + 资产 + 分镜 + 校验。
 
 ## 一、四个顶层 Skill
@@ -524,27 +524,11 @@ $zion-qa
 
 按当前任务使用上述检查，不要求每次全部填齐。QA 默认只报告；检查模式由材料和请求判断，不需要用户先掌握模式名称。
 
-## 十三、修改后校验
+## 十三、维护与安装入口
 
-工作区由 codex 与 WorkBuddy 共同维护，**流程、并发规则与清理纪律的唯一来源是工作区根目录的 [`AGENTS.md`](AGENTS.md)**，两处都按它执行。三个工具：
-
-| 工具 | 用途 |
-|---|---|
-| `.workbuddy/tools/skill_lint.py` | 查构建垃圾、无引用文件、内容重复、断链与失效锚点、**正文 `§x` 章节引用**、跨技能相对路径链接；`--meta` 附加说明性文本候选 |
-| `.workbuddy/tools/skill_guard.py` | 技能写租约（`acquire`／`release`／`status`）与基线快照（`snapshot`／`check`），防两个会话互相覆盖 |
-| `.workbuddy/tools/sync_skills.py` | 镜像到安装目录，`--target codex|workbuddy` 只同步自己那份，`--dry` 只报差异 |
-
-## 十四、版本维护
-
-- 当前入口：[`zion-script`](zion-script/SKILL.md)、[`zion-assets`](zion-assets/SKILL.md)、[`zion-storyboard`](zion-storyboard/SKILL.md)、[`zion-qa`](zion-qa/SKILL.md)。
-- 旧入口 `zion-character` 已并入 `zion-assets`；旧入口 `zion-studio` 已拆为 `zion-assets` 和 `zion-storyboard`。
-- 全能参考资产模式见 `zion-assets` 的 [资产输出契约](zion-assets/references/asset-output-schema.md)；创意确认按各 Skill 的需求判断；小说改编由 `zion-script` 承接；生产流程见本手册“推荐制作流程”。
-- 四个技能均支持单独安装。其他技能可用且任务需要时再交接；缺少下游技能时先交付本技能范围内的结果、已确认事实和待补材料，明确尚未完成的部分。跨技能引用只写技能名和档名，不写相对路径。
-- `parse_input.py` 在 `zion-assets` 与 `zion-storyboard` 各存一份，供各自单独安装；两份内容必须完全一致，由 `skill_lint.py` 的 DECLARED DUPLICATE 项校验。
-- 安装目标分别为 `~/.codex/skills` 与 `~/.workbuddy/skills`，各会话按工作区规程同步自己使用的安装目录。
-- **分享给他人**：仓库 `https://gitee.com/ZionZhang/zion-skills.git` 为公开仓库，对方 `git clone` 后把四个技能目录整体复制到上述安装目录即可；**最省事的做法是让对方的 agent 自己装**——把仓库地址与安装提示词发给它（模板见 [`README.md`](README.md) 第 3.1 节）。归档 zip 无需 git、约 900KB，但注意它是 **302 跳转**：下载必须跟随跳转（`curl -L`／`wget` 默认跟随），否则下到的是一个 46KB 的 HTML 页面而不是 zip（实测 DeepSeek Harness 踩过）；不确定就用 `git clone --depth 1`。
-- **跨 agent 通用**：技能用 `SKILL.md` 开放标准（Agent Skills），Claude Code／Codex／Cursor／ZCode／DeepSeek Harness 等读同一套格式，差异只在安装目录；`~/.agents/skills/` 是多数工具都扫的公约目录。已核实的目录清单见 [`README.md`](README.md) 第 3.1.1 节。
-- **更新已安装的旧版本**：在克隆目录里 `git pull` 后重跑同步（或重新克隆覆盖），**不要只覆盖 `SKILL.md`**——技能是一整个目录，`references/` 会增删。仓库更新与安装目录生效是两件事。
-- 安装后若新 Skill 未出现在选择器中，重启对应客户端（Codex / WorkBuddy）再检查。
+- 修改、并发、校验与提交条件：[AGENTS.md](AGENTS.md)。
+- 安装、更新、目标目录和验证：[README.md](README.md) 第三节。
+- 当前版本、规模与变更：[CHANGELOG.md](CHANGELOG.md)。
+- 历史决策与旧入口迁移：[归档索引](.workbuddy/archive/README.md)，仅回溯时读取。
 
 官方使用说明：[Build skills](https://learn.chatgpt.com/docs/build-skills)。

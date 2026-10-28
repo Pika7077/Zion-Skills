@@ -4,13 +4,9 @@
 
 **内容归属**（风格／色彩／镜头／声音等各归哪一档）在 `.workbuddy/memory/style-single-source.md`；**外部材料的归类与吸收规则**在 `.workbuddy/memory/material-intake.md`。改这两类事改那两份，本文件只留提要。
 
-## 工具三件套（`.workbuddy/tools/`）
+## 工具的已知限制
 
-- `skill_lint.py` —— 内容校验：JUNK／ORPHAN／DUPLICATE／DANGLING／SECTION_REF／CROSS／`--meta`。
-- `skill_guard.py` —— 并发守卫：写租约 `acquire`／`release`／`status`，基线 `snapshot`／`check`。
-- `sync_skills.py` —— 安装目录镜像，`--target codex|workbuddy` 只写自己那份。
-
-调用前先读 docstring 确认参数：未匹配的参数会被**静默忽略**，可能退化成无参数全量同步（写两处安装目录）。
+工具职责与操作流程见根目录 `AGENTS.md`。`sync_skills.py` 未匹配的参数会被静默忽略，可能退化成无参数全量同步；调用前核对 docstring，显式指定 `--target`。目标目录不存在时会跳过，不能据退出成功声称首次安装已完成。
 
 ## 独立安装口径（2026-09-20）
 
@@ -21,34 +17,15 @@
 - `parse_input.py` 在 `zion-assets` 与 `zion-storyboard` 各留一份完整副本（登记 DECLARED_DUPES，内容须一致）。
 - 不用“薄壳委托”或跨技能相对路径解决——会让单独安装功能缺失。
 
-## 安装与安装后验证（2026-09-23）
+## 安装与分发
 
-安装＝`sync_skills.py --target workbuddy`（镜像规则：缺失补齐、不同覆盖、源已删移除）。装机后五项验证，缺一不算装完：
-
-1. **幂等自检**：紧跟 `--dry`，应 `added=0 updated=0 removed=0`。
-2. **逐技能比对**：`diff -r --exclude=__pycache__ <技能> ~/.workbuddy/skills/<技能>`，四个都无输出。
-3. **安装目录顶层 ≠ 工作区**：那里还有非本家族的技能与 `_bm_skillid_migration.json`，**不属于本仓库、不要清理**。
-4. **在安装副本上重跑两组回归**——工作区绿 ≠ 装机可用。
-5. **元数据用 Python 显式 UTF-8 读一次**（解码合法、无 BOM、LF）。**bash 里 `head`／`grep` 看 SKILL.md 中文显示乱码是 Windows 终端 GBK 问题，不是文件损坏**。
-
-## 对外分发
-
-仓库 `https://gitee.com/ZionZhang/zion-skills.git`（**公开**，匿名 clone 可用）。
-
-- **首选：归档 zip** `.../repository/archive/main.zip`（892KB，无需 git／账号，不含 `.git` 与 `_user_meta.json`）。代价：升级要整体覆盖，精确增删仍走 git + `sync_skills.py`。
-- **归档地址是 302 跳转，不是直链**：302 响应自身的 `Content-Type` 就是 `text/html`（约 46KB），**不跟随跳转的客户端会把这段 HTML 当下载结果存下来**。下载必须跟跳转（`curl -L`；wget 默认跟随）。**「拿到 HTML」≠「仓库不可见」**——干净环境下实测能下到真 zip（`PK` 魔数）、匿名 `ls-remote` 能读 HEAD。**推断仓库可见性要实测，不能反推**。
-- **对方安装**：把 `README.md` 第 3.1 节的提示词原样转发即可（已做成品牌无关）。跨 agent 通用，唯一变量是安装目录：Codex `~/.codex/skills/`、Claude Code `~/.claude/skills/`、Cursor `~/.cursor/skills/`、ZCode `~/.zcode/skills/`、DSH `$DSH_HOME/skills`；不确定时用 `~/.agents/skills/` 兜底（公约目录，但非人人认）。装到 claude／codex 会被其他工具顺带认到。
-- **`sync_skills.py` 只支持 `--target codex|workbuddy`**（TARGETS 硬编码）。写指令必须写明只覆盖这两个，其他环境走手工复制。
-- **更新＝整目录**，不能只覆盖 `SKILL.md`（`references/` 会增删）；**仓库更新 ≠ 安装目录生效**；装完／更新后**重启客户端**。
-- **镜像会顺带清掉旧 `_user_meta.json`**（本机状态文件，已 `git rm --cached` + `.gitignore`），由客户端重新生成，属预期。
-- **报版本用 commit SHA**，不用 `vX.Y.Z`（技能目录不写版本号，commit 是唯一锚点）。
-- 新增仓库级文件先自问：**这是内容还是本机状态**？状态类（安装时间戳、锁、缓存、路径）一律忽略。
+统一见根目录 `README.md` 第三节；本档不重复命令、目标目录或验证清单。
 
 ## 并发写入
 
 已发生两起事故（2026-09-20）：`12-visual-style-and-grading.md` 被另一会话整篇替换；`05-scene-and-color-bible.md`、`07-prompt-spec.md` 被删除（旧副本在 `.workbuddy/archive/source-deleted-2026-09-20/`，用户决定不恢复）。
 
-应对：写租约 + 基线快照。收工前必跑 `skill_guard.py check`；自己没改过的文件出现在漂移列表里先对齐；删除类改动先归档；源文件被对方删除时从安装目录抢救。
+应对：写租约 + 基线快照。操作要求见 `AGENTS.md`；源文件被另一会话删除时，可从安装副本抢救后再核对。
 
 **两会话同名（都写 `workbuddy`）时**：`--owner` 无法区分谁持有——遇到「自己没领却显示被占」**不要 `--force`**，先看当日日志与 `git status`；各自计版本号会撞号，后写的一方让号并在 CHANGELOG 独立成节；**对方的当日日志会记下你的动作，是核对并发的主要线索**。
 
@@ -79,13 +56,11 @@ lint 不查「八种／九种」「共 N 档」这类计数。已实证真 bug�
 4. **SKILL.md 直链覆盖率**：逐技能算链接集合 vs 实际档集合。
 5. **单一来源地图未登记项分类核对**（内容档必须登记；契约／格式／检查表／工具档不登记，清单在该档末尾）。
 6. **自然语言计数交叉核对** + **记录里的能力声明是否真的存在**（曾发现 CHANGELOG 声称的 `quick_validate.py` 从未存在）。
-7. **CHANGELOG 分两个区块**：上卷 `## vX.Y.Z`，**现行最新条目在 `## 变更记录` 区用 `### vX.Y.Z`**。查“哪些版本没记”要 `grep -nE '^#{2,3} '` 提取两区标题再比——2026-10-10 曾因只 grep `^## v` 误判 v5.6.1–v5.8.0 缺失。
+7. **查版本历史先读归档索引**：当前变化在根目录 `CHANGELOG.md`；旧记录已归档，原快照曾混用二级和三级版本标题，检索需同时覆盖两种，不能只搜 `^## v`。
 
-## 版本管理（2026-09-21）
+## 版本管理
 
-- 版本号与变更记录外置在 `CHANGELOG.md`，**不写进技能文件**；**V2 自「四技能定名」起算**（`v2.0.0`）。
-- 三个数字：**第一位＝结构性大更新**（拆分／合并／职责重划、成体系吸收外部来源）；**第二位＝新增参考档（补档不跳主版本）或同时好几个小改动**（本工作区最常见形态）；**第三位＝小改动**（措辞、错字、计数与节号、单条判据、规模表）。顺序：先看结构调整／成体系吸收 → 再看新档或多个小改同时 → 其余动第三位。
-- 规模快照随版本记录，收工后更新（已写入 `AGENTS.md` 维护契约）。
+版本规则与规模快照统一见根目录 `CHANGELOG.md`；技能正文不写版本号。
 
 ## 外部来源的吸收口径
 
@@ -95,7 +70,7 @@ lint 不查「八种／九种」「共 N 档」这类计数。已实证真 bug�
 
 ## Git 与换行符
 
-- 工作区是 Git 仓库（`main`）；**收工最后一步提交**（标准循环第 11 步），提交信息写清技能、改动与版本号。
+- 原维护工作区使用 `main`；提交与推送条件统一见根目录 `AGENTS.md`，本档不另设收工提交要求。
 - 远端 Gitee `origin`（HTTPS）。推送需 `env -u https_proxy -u http_proxy -u HTTPS_PROXY -u HTTP_PROXY`（沙箱代理会中断传输）+ `GIT_CONFIG_NOSYSTEM=1` + `GIT_TERMINAL_PROMPT=0`；用户名填 **Gitee 用户名**，密码用私人令牌；仓库级 `http.version HTTP/1.1`。
 - **`GIT_CONFIG_NOSYSTEM=1` 是必需的**（2026-09-22）：系统级 `etc/gitconfig` 设了 `credential.helper=helper-selector`，认证前要跑约 40 秒内部 `git config` 查询，常在传输前被超时杀掉，表现为 **push 无输出挂死**。
 - **凭据助手路径随 PortableGit 版本走**（2026-10-12 实测）：全局 `~/.gitconfig` 的 `credential.helper` 是**绝对路径**，PortableGit 由 1.2.0 升到 1.3.0 后旧路径失效，push 报 `could not read Username`。修法：`git config --global credential.helper '!<...>/versions/1.3.0/mingw64/bin/git-credential-manager.exe'`；临时可用 `-c credential.helper= -c credential.helper='!<新路径>'` 覆盖。**每次 PortableGit 升级后要复查这条**（版本号见 `.../versions/current`）。
