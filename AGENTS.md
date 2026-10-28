@@ -10,7 +10,7 @@
 |---|---|
 | 技能源（唯一真相） | `zion-assets` / `zion-qa` / `zion-script` / `zion-storyboard` |
 | 维护工具 | `.workbuddy/tools/`：`skill_lint.py`、`skill_guard.py`、`sync_skills.py` |
-| 归档 | `.workbuddy/archive/` |
+| 归档 | `.workbuddy/archive/`；索引见该目录 `README.md`，按问题回溯 |
 | 手册 | `Zion技能使用手册.md` |
 | 版本与变更记录 | `CHANGELOG.md` |
 | Git 仓库 | 工作区根目录，`main` 分支；远端 `origin` 指向 Gitee（HTTPS，推送命令与凭据注意事项见 `.workbuddy/memory/MEMORY.md`）；`.workbuddy/locks`、`.workbuddy/state` 与嵌套仓库 `codex-skills/` 不入库 |
@@ -23,7 +23,7 @@
 - 根目录 Git 仓库跟踪四个技能源、根级文档、`.workbuddy/tools/`、`.workbuddy/memory/` 与 `.workbuddy/archive/`。
 - `codex-skills/` 是独立的嵌套仓库，由父仓库忽略，不登记成 submodule，也不混入本仓库提交。
 - `.workbuddy/state/`、`.workbuddy/locks/`、Python 缓存、本地虚拟环境、密钥与临时文件不提交；具体规则见根目录 `.gitignore`。
-- 提交前执行本文件的收工校验；未经用户明确要求，不代为创建提交、推送或改写远端历史。
+- 提交前执行本文件的收工校验；提交与推送按下文第 11 步的交付条件执行；未经用户明确要求，不合并或改写远端历史。
 
 ## 标准循环
 
@@ -39,12 +39,12 @@
 8  python .workbuddy/tools/sync_skills.py --target <codex|workbuddy>
 9  更新 CHANGELOG.md 的版本号、条目与「当前规模」表
 10 python .workbuddy/tools/skill_guard.py release <skill> --owner <会话名>
-11 git add -A && git commit -m "<技能>: <改了什么>（vX.Y.Z）"
+11 仅在用户要求提交或交付 PR 时：git add <本次文件> && git commit -m "<技能>: <改了什么>（vX.Y.Z）"
 ```
 
 对照各技能 `tests/manual-regression.md` 人工复核，是同一步收工动作的一部分。
 
-第 11 步的提交是收工的最后一环：**一次逻辑改动一次提交**，提交信息写清技能、改动与版本号（版本号见 `CHANGELOG.md`）。
+第 11 步是有条件的交付动作：普通修改完成校验后保留变更；用户要求提交或交付 PR 时，**一次逻辑改动一次提交**，只暂存本次文件。推送按已授权的交付范围执行；合并与改写远端历史另需明确要求。版本规则见 `CHANGELOG.md`。
 
 ## 硬规则
 
@@ -64,6 +64,8 @@
 - **提交只含自己的改动范围**：发现工作区有对方未提交的改动时先说明再决定，不把对方的半成品一起提交。提交前确保 lint 为 0、回归全绿、CHANGELOG 已更新。
 
 ## 清理纪律
+
+- 日常任务先读现行入口；不递归加载 `.workbuddy/archive/`、按日期命名的记忆日志与历史变更记录。只有追溯具体问题、来源或旧决策时才按索引检索；历史文本不覆盖现行规则。
 
 - 没有入站引用的文件不留：有价值就先接线到 SKILL.md，否则删除。
 - 来源沿革、与旧档的对比脚手架、自述定位等不驱动行为的文本不写。
