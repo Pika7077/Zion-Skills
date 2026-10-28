@@ -143,6 +143,8 @@ def asset_binding(asset: dict) -> str:
 
 def validate_shot(shot: dict, require_prompt: bool = False) -> list:
     """验证单个镜头的必要字段，返回错误列表"""
+    if not isinstance(shot, dict):
+        return ['镜头必须是对象']
     errors = []
     required = ['shot_number', 'time_range', 'framing', 'camera_movement', 'lighting', 'description']
     for field in required:
@@ -153,6 +155,56 @@ def validate_shot(shot: dict, require_prompt: bool = False) -> list:
     if require_prompt and not generation_prompt(shot).strip():
         errors.append(f"镜头 {shot.get('shot_number', '?')} 缺少 generation_prompt/seedance_prompt")
     return errors
+
+
+def validate_document(data):
+    """Validate one document before helpers inspect nested metadata or shots."""
+    if not isinstance(data, dict):
+        return ['分镜必须是对象']
+    meta = data.get('meta', {})
+    if not isinstance(meta, dict):
+        return ['meta 必须是对象']
+    if meta.get('asset_mode') is not None and not isinstance(meta['asset_mode'], dict):
+        return ['meta.asset_mode 必须是对象']
+    shots = data.get('shots')
+    if not isinstance(shots, list) or not shots:
+        return ['shots 必须是非空列表']
+    if any(not isinstance(shot, dict) for shot in shots):
+        return ['shots 中每个镜头必须是对象']
+    require_prompt = meta.get('include_generation_prompts') is True or any(
+        generation_prompt(shot) for shot in shots
+    )
+    errors = []
+    for shot in shots:
+        errors.extend(validate_shot(shot, require_prompt=require_prompt))
+        if not isinstance(shot.get('time_range'), dict):
+            errors.append(f"镜头 {shot.get('shot_number', '?')} 的 time_range 必须是对象")
+    errors.extend(audit_assets(data)['issues'])
+    return errors
+
+
+def validate_payload(data):
+    """Accept a document, document list, or exported batch; validate every item."""
+    if isinstance(data, dict) and 'results' in data:
+        targets = data['results']
+        if not isinstance(targets, list):
+            return ['results 必须是列表'], 0
+    else:
+        targets = data if isinstance(data, list) else [data]
+    if not targets:
+        return ['没有可验证的分镜'], 0
+    errors = []
+    for index, item in enumerate(targets, 1):
+        label = f'第 {index} 项'
+        document = item
+        if isinstance(item, dict) and ('data' in item or 'status' in item):
+            label += f"（{item.get('file', '未命名')}）"
+            if item.get('status', 'success') != 'success':
+                errors.append(f"{label}：处理失败：{item.get('error', item.get('status'))}")
+                continue
+            document = item.get('data')
+        errors.extend(f'{label}：{error}' for error in validate_document(document))
+    return errors, len(targets)
 
 
 def audit_legacy_variety(data: dict) -> dict:
@@ -669,6 +721,9 @@ def main():
 
     args = parser.parse_args()
 
+    if args.batch and not os.path.isdir(args.input):
+        parser.error('--batch 的输入必须是目录')
+
     # 加载数据
     if args.batch and os.path.isdir(args.input):
         results = []
@@ -684,23 +739,14 @@ def main():
             data = json.load(f)
 
     # 验证
-    if args.validate and not args.batch:
-        if isinstance(data, dict):
-            shots = data.get('shots', [])
-            errors = [] if shots else ['没有镜头']
-            require_prompt = data.get('meta', {}).get('include_generation_prompts') is True or any(
-                generation_prompt(shot) for shot in shots if isinstance(shot, dict)
-            )
-            for shot in shots:
-                errors.extend(validate_shot(shot, require_prompt=require_prompt))
-            errors.extend(audit_assets(data)['issues'])
-            if errors:
-                print("验证错误:")
-                for e in errors:
-                    print(f"  - {e}")
-                raise SystemExit(1)
-            else:
-                print(f"验证通过：{len(shots)} 个镜头数据完整")
+    if args.validate:
+        errors, count = validate_payload(data)
+        if errors:
+            print("验证错误:")
+            for error in errors:
+                print(f"  - {error}")
+            raise SystemExit(1)
+        print(f"验证通过：{count} 份分镜数据完整")
         return
 
     # 审计

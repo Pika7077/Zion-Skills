@@ -29,16 +29,17 @@
 
 ```text
 1  python .workbuddy/tools/skill_guard.py status
-2  python .workbuddy/tools/skill_guard.py acquire <skill> --owner <codex|workbuddy> --intent "<要做什么>"
+2  python .workbuddy/tools/skill_guard.py acquire <skill> --owner <codex|workbuddy> --session <本会话唯一ID> --intent "<要做什么>"
 3  python .workbuddy/tools/skill_guard.py snapshot --by <会话名>
 4  …改文件…
 5  python .workbuddy/tools/skill_lint.py                      # 必须 0 问题
 6  python -B zion-assets/tests/test_extract_characters.py
-   python -B zion-storyboard/tests/test_storyboard_audit.py    # 必须全绿
+   python -B zion-storyboard/tests/test_storyboard_audit.py
+   python -B .workbuddy/tools/tests/test_maintenance.py        # 必须全绿
 7  python .workbuddy/tools/skill_guard.py check                # 看这段时间有没有别人也在写
 8  python .workbuddy/tools/sync_skills.py --target <codex|workbuddy>
 9  更新 CHANGELOG.md 的版本号、条目与「当前规模」表
-10 python .workbuddy/tools/skill_guard.py release <skill> --owner <会话名>
+10 python .workbuddy/tools/skill_guard.py release <skill> --owner <工具名> --session <同一会话ID>
 11 仅在用户要求提交或交付 PR 时：git add <本次文件> && git commit -m "<技能>: <改了什么>（vX.Y.Z）"
 ```
 
@@ -51,6 +52,7 @@
 - **不写别人持有租约的技能**。确实需要抢占就 `--force`，并在当日日志记一笔。
 - 建议分工（非强制，只为少撞车）：codex 主写 `zion-script` 与 `zion-qa`，WorkBuddy 主写 `zion-assets` 与 `zion-storyboard`；跨到非主写技能时先看 `status`。
 - 租约默认 180 分钟；过期视为失效，可被接管（会写进 `history`）。
+- `--owner` 是工具名，`--session` 是每个会话独立生成并在续租、释放时复用的 ID（可用 UUID）；不能让两个会话共用 ID。系统文件锁串行化租约的领取、续租与释放；`--force` 也不能绕过正在进行的更新。旧版无会话 ID 的租约不按工具名自动认领，需等待过期，或确认旧会话已结束后显式接管。损坏租约会阻止操作，先核对并修复，不当成空闲。
 - **跨技能改动逐个领租约**，不要一次抓四个；做完一个释放一个。
 - 工作区是唯一源，**安装目录只写不改**：codex → `~/.codex/skills`，WorkBuddy → `~/.workbuddy/skills`。用 `sync_skills.py --target` 只同步自己那份。
 - 删除文件先归档到 `.workbuddy/archive/`，再同步；不直接删安装目录里的文件。

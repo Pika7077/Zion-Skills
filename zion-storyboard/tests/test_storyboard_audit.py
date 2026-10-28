@@ -8,7 +8,7 @@ import unittest
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
-from export_output import audit_assets, audit_variety, audit_fidelity, generate_markdown, validate_shot
+from export_output import audit_assets, audit_variety, audit_fidelity, generate_markdown, validate_shot, validate_payload
 
 
 def fixture():
@@ -277,6 +277,54 @@ class Regression(unittest.TestCase):
         self.assertIn('### 镜头1（0-10秒）：特写', with_time)
         self.assertIn('### 镜头1：特写', without)
         self.assertNotIn('（0-10秒）', without)
+
+    def test_validate_rejects_invalid_top_level_and_nested_types(self):
+        payloads = [None, 42, 'text', [], [42], {}, {'results': None},
+                    {'shots': [42]}, {'meta': [], 'shots': [{}]},
+                    {'meta': {'asset_mode': []}, 'shots': [{}]},
+                    {'shots': 'not a list'}]
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                self.assertTrue(validate_payload(payload)[0])
+
+    def test_validate_accepts_single_list_wrapper_and_exported_batch(self):
+        d = fixture()
+        wrapper = {'file': 'scene', 'status': 'success', 'data': d}
+        for payload in (d, [d], [wrapper], {'batch_meta': {}, 'results': [wrapper]}):
+            with self.subTest(payload_type=type(payload).__name__):
+                self.assertEqual(validate_payload(payload), ([], 1))
+
+    def test_validate_checks_every_batch_item_and_reports_file(self):
+        valid = fixture()
+        bad = self.asset_fixture()
+        bad['shots'][0]['character_refs'] = ['@MISSING']
+        payload = [{'file': 'good.json', 'status': 'success', 'data': valid},
+                   {'file': 'bad.json', 'status': 'success', 'data': bad}]
+        errors, count = validate_payload(payload)
+        self.assertEqual(count, 2)
+        self.assertTrue(any('bad.json' in error and '@MISSING' in error for error in errors))
+        self.assertTrue(validate_payload([{'file': 'failed', 'status': 'error', 'error': 'cannot parse', 'data': valid}])[0])
+
+    def test_cli_validate_invalid_list_exits_nonzero(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / 'invalid.json'
+            p.write_text('[42]', encoding='utf-8')
+            result = subprocess.run([sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'export_output.py'), str(p), '--validate'], capture_output=True, text=True, encoding='utf-8')
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('第 1 项', result.stdout)
+            self.assertNotIn('Traceback', result.stderr)
+
+    def test_cli_batch_validation_rejects_empty_and_invalid_directory(self):
+        with tempfile.TemporaryDirectory() as td:
+            directory = Path(td)
+            cmd = [sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'export_output.py'), td, '--batch', '--validate']
+            self.assertNotEqual(subprocess.run(cmd, capture_output=True).returncode, 0)
+            (directory/'good.json').write_text(json.dumps(fixture()), encoding='utf-8')
+            self.assertEqual(subprocess.run(cmd, capture_output=True).returncode, 0)
+            (directory/'bad.json').write_text('[42]', encoding='utf-8')
+            result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8')
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('bad.json', result.stdout)
 
 
 if __name__=='__main__':
