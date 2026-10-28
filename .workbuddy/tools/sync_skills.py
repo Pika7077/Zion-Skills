@@ -18,8 +18,10 @@ WorkBuddy 写 ~/.workbuddy/skills，避免两边同时写同一目录。
 import argparse
 import filecmp
 import os
+import re
 import shutil
 import sys
+from urllib.parse import unquote, urlsplit
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SKILLS = ["zion-assets", "zion-qa", "zion-script", "zion-storyboard"]
@@ -44,6 +46,33 @@ def walk(base):
     return out
 
 
+def validate_source_files(base, files):
+    """Read all source files and resolve skill-local links before any writes."""
+    base = os.path.realpath(base)
+    for relative, path in files.items():
+        with open(path, 'rb') as fh:
+            content = fh.read()
+        if not relative.endswith('.md'):
+            continue
+        text = content.decode('utf-8')
+        links = re.findall(r'\]\(([^)]+)\)', text)
+        if relative == 'SKILL.md':
+            links += re.findall(r'\b(?:scripts|tests)/[\w./-]+\.(?:py|md)', text)
+        for raw in links:
+            raw = raw.strip()
+            # Markdown link titles are not part of the target path.
+            if raw.startswith('<') and '>' in raw:
+                raw = raw[1:raw.index('>')]
+            else:
+                raw = re.split(r'\s+[\'\"]', raw, maxsplit=1)[0]
+            url = urlsplit(raw)
+            if url.scheme in ('http', 'https', 'mailto') or not url.path:
+                continue
+            target = os.path.realpath(os.path.join(os.path.dirname(path), unquote(url.path)))
+            if os.path.commonpath([base, target]) != base or not os.path.isfile(target):
+                raise OSError('技能源引用缺失或越界：%s -> %s' % (path, raw))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--target", choices=sorted(TARGETS))
@@ -64,7 +93,8 @@ def main(argv=None):
                 if not fh.read().strip():
                     raise OSError("技能入口为空：%s" % entry)
             sources[skill] = walk(src)
-    except OSError as error:
+            validate_source_files(src, sources[skill])
+    except (OSError, UnicodeError, ValueError) as error:
         print("同步已停止：%s" % error, file=sys.stderr)
         return 1
 

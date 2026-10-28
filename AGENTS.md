@@ -34,6 +34,7 @@
 4  …改文件…
 5  python .workbuddy/tools/skill_lint.py                      # 必须 0 问题
 6  python -B zion-assets/tests/test_extract_characters.py
+   python -B zion-assets/tests/test_parse_input.py
    python -B zion-storyboard/tests/test_storyboard_audit.py
    python -B .workbuddy/tools/tests/test_maintenance.py        # 必须全绿
 7  python .workbuddy/tools/skill_guard.py check                # 看这段时间有没有别人也在写

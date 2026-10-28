@@ -89,7 +89,7 @@ Copy-Item -Recurse zion-script,zion-assets,zion-storyboard,zion-qa "$env:USERPRO
 
 ### 3.3 维护者同步与验证
 
-在开发工作区修改源文件，按 [AGENTS.md](AGENTS.md) 校验后同步**已有**安装目录。未知参数、缺失参数或源技能缺少有效入口时会停止，不执行镜像：
+在开发工作区修改源文件，按 [AGENTS.md](AGENTS.md) 校验后同步**已有**安装目录。未知参数、缺失参数、源技能缺少有效入口或本地引用文件时会停止，不执行镜像：
 
 ```bash
 python .workbuddy/tools/sync_skills.py --target codex

@@ -143,4 +143,4 @@ python scripts/extract_characters.py <text-file> --source-type 剧本
 
 ## 回归资料
 
-[人物提取脚本回归](tests/test_extract_characters.py) · [人工回归清单](tests/manual-regression.md)
+[人物提取脚本回归](tests/test_extract_characters.py) · [文件解析回归](tests/test_parse_input.py) · [人工回归清单](tests/manual-regression.md)

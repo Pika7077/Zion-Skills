@@ -67,6 +67,27 @@ class CharacterSchemaRegression(unittest.TestCase):
         self.assertEqual(first["characters"][0]["appearance_count"], 1)
         self.assertEqual(second["characters"][0]["appearance_count"], 1)
 
+    def test_contained_names_are_not_merged_without_evidence(self):
+        for text in ('王强：我不是王强生。\n王强生：我们是两个人。',
+                     '王强生：我们是两个人。\n王强：我不是王强生。'):
+            result = CharacterExtractor(text).extract()
+            self.assertEqual({c['name'] for c in result['characters']}, {'王强', '王强生'})
+            self.assertTrue(all(c['appearance_count'] == 1 and c['aliases'] == [] for c in result['characters']))
+            self.assertTrue(any('暂保留独立人物' in note for note in result['meta']['extraction_notes']))
+
+    def test_speaker_directions_preserve_names_and_dialogue(self):
+        result = CharacterExtractor('林岚（低声）：签了。\n周衡 (迟疑)（回头）: 不签。\n旁白（轻声）：夜深了。').extract()
+        by_name = {c['name']: c for c in result['characters']}
+        self.assertEqual(set(by_name), {'林岚', '周衡'})
+        self.assertEqual(by_name['林岚']['dialogue_style']['sample_lines'], ['签了。'])
+        self.assertEqual(by_name['周衡']['dialogue_style']['sample_lines'], ['不签。'])
+
+    def test_possible_alias_notes_do_not_accumulate_between_runs(self):
+        extractor = CharacterExtractor('林婉儿：我到了。\n婉儿：等一下。')
+        first, second = extractor.extract(), extractor.extract()
+        self.assertEqual(first['meta']['extraction_notes'], second['meta']['extraction_notes'])
+        self.assertEqual(len(first['characters']), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

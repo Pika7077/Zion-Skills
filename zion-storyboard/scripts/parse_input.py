@@ -3,7 +3,7 @@
 
 支持：
 - TXT：多编码读取
-- DOCX：提取段落文本
+- DOCX：按正文顺序提取段落及表格（含嵌套表格）文本
 - PDF：PyMuPDF (fitz) -> pdfplumber -> PyPDF2 多级回退
 - MP4/MOV/AVI/MKV/WEBM：ffprobe 元数据；可选抽帧（--video-frames）或抽音频（--extract-audio）
 - --structure：尝试解析剧本结构（场次、角色、对白）
@@ -17,6 +17,7 @@
 
 import argparse
 import json
+import math
 import os
 import subprocess
 import sys
@@ -38,23 +39,42 @@ def parse_txt(file_path: str) -> str:
 
 
 def parse_docx(file_path: str) -> str:
-    """提取 DOCX 文件的段落文本"""
+    """Extract body paragraphs and table cells in document order."""
     try:
         import docx
+        from docx.oxml.ns import qn
+        from docx.table import Table
+        from docx.text.paragraph import Paragraph
         doc = docx.Document(file_path)
-        text_parts = []
-        for paragraph in doc.paragraphs:
-            if paragraph.text.strip():
-                text_parts.append(paragraph.text)
-        return '\n\n'.join(text_parts)
+
+        def blocks(element):
+            for child in element.iterchildren():
+                if child.tag == qn('w:p'):
+                    text = Paragraph(child, doc).text
+                    if text.strip():
+                        yield text
+                elif child.tag == qn('w:tbl'):
+                    for row in Table(child, doc).rows:
+                        seen, cells = set(), []
+                        for cell in row.cells:
+                            if cell._tc in seen:
+                                continue
+                            seen.add(cell._tc)
+                            cells.append('\n'.join(blocks(cell._tc)))
+                        if any(text.strip() for text in cells):
+                            yield '\t'.join(cells)
+
+        return '\n\n'.join(blocks(doc.element.body))
     except ImportError:
         return "[WARNING] 未安装 python-docx，无法解析 DOCX。请安装: pip install python-docx\n[FILE_PATH] " + file_path
 
 
 def parse_pdf(file_path: str) -> str:
     """提取 PDF 文本，fitz -> pdfplumber -> PyPDF2 多级回退"""
+    available_engines = []
     try:
         import fitz
+        available_engines.append('PyMuPDF')
         text_parts = []
         with fitz.open(file_path) as doc:
             for page in doc:
@@ -69,13 +89,16 @@ def parse_pdf(file_path: str) -> str:
 
     try:
         import pdfplumber
+        available_engines.append('pdfplumber')
         text_parts = []
         with pdfplumber.open(file_path) as pdf:
             for page in pdf.pages:
                 text = page.extract_text()
                 if text:
                     text_parts.append(text)
-        return '\n\n'.join(text_parts)
+        content = '\n\n'.join(text_parts)
+        if content.strip():
+            return content
     except ImportError:
         pass
     except Exception:
@@ -83,6 +106,7 @@ def parse_pdf(file_path: str) -> str:
 
     try:
         import PyPDF2
+        available_engines.append('PyPDF2')
         text_parts = []
         with open(file_path, 'rb') as f:
             reader = PyPDF2.PdfReader(f)
@@ -90,12 +114,16 @@ def parse_pdf(file_path: str) -> str:
                 text = page.extract_text()
                 if text:
                     text_parts.append(text)
-        return '\n\n'.join(text_parts)
+        content = '\n\n'.join(text_parts)
+        if content.strip():
+            return content
     except ImportError:
         pass
     except Exception:
         pass
 
+    if available_engines:
+        return "[WARNING] 已尝试的 PDF 提取器未取得可用文本；请检查文件、加密状态或是否需要 OCR。\n[FILE_PATH] " + file_path
     return "[WARNING] 未安装 PyMuPDF / pdfplumber / PyPDF2，无法解析 PDF。请安装: pip install PyMuPDF\n[FILE_PATH] " + file_path
 
 
@@ -159,8 +187,16 @@ def get_video_metadata(file_path: str) -> dict:
     return metadata
 
 
+def positive_interval(value):
+    interval = float(value)
+    if isinstance(value, bool) or not math.isfinite(interval) or interval <= 0:
+        raise ValueError('抽帧间隔必须为有限正数')
+    return interval
+
+
 def extract_video_frames(file_path: str, output_dir: str, interval: float = 3.0) -> list:
     """从视频中按间隔提取关键帧"""
+    interval = positive_interval(interval)
     os.makedirs(output_dir, exist_ok=True)
     frames = []
 
@@ -262,7 +298,7 @@ def main():
     parser.add_argument('--type', '-t', choices=['pdf', 'txt', 'docx', 'video', 'auto'],
                         default='auto', help='文件类型（默认自动检测）')
     parser.add_argument('--video-frames', help='视频帧输出目录')
-    parser.add_argument('--frame-interval', type=float, default=3.0,
+    parser.add_argument('--frame-interval', type=positive_interval, default=3.0,
                         help='视频帧提取间隔（秒，默认3秒）')
     parser.add_argument('--extract-audio', action='store_true',
                         help='从视频提取 16kHz 单声道 WAV 供语音识别')

@@ -27,21 +27,21 @@ class CharacterExtractor:
         self.file_type = file_type
         self.lines = text.splitlines()
         self.characters = {}  # name -> info dict
-        self.aliases_map = {}  # 别名 -> 正式名
+        self.alias_notes = []
 
     def extract(self) -> dict:
         """主提取流程"""
         # 每次提取生成独立结果，复用实例时也不累加上次的对白。
         self.characters = {}
-        self.aliases_map = {}
+        self.alias_notes = []
         # Step 1: 识别剧本结构
         scene_blocks = self._split_scenes()
 
         # Step 2: 识别所有出场人物
         self._identify_characters(scene_blocks)
 
-        # Step 3: 合并同一个人物的不同称呼
-        self._merge_aliases()
+        # Step 3: 标出待核实的称呼，名称包含关系不构成合并证据。
+        self._flag_possible_aliases()
 
         # Step 4: 提取每个角色的详细信息
         self._extract_character_info()
@@ -81,12 +81,7 @@ class CharacterExtractor:
     def _identify_characters(self, scene_blocks: list):
         """从场景块中识别所有人物"""
         # 对白模式：角色名后跟对白
-        dialogue_pattern = re.compile(r'^([^\s：（(]{1,8})[：:](.*)')
-
-        # 叙述提及模式
-        mention_patterns = [
-            re.compile(r'([^\s，。,\.]{2,4})(?:说|道|问|答|喊|叫|吼|叫喊)'),
-        ]
+        dialogue_pattern = re.compile(r'^([^\s：（(:]{1,8})\s*(?:（[^）]*）\s*|\([^)]*\)\s*)*[：:](.*)')
 
         for block in scene_blocks:
             lines = block.splitlines()
@@ -128,39 +123,13 @@ class CharacterExtractor:
         """标准化人物名，去除空格和标点"""
         return re.sub(r'[\s（）()\[\]【】""'']', '', name).strip()
 
-    def _merge_aliases(self):
-        """合并同一人物的不同称呼"""
-        # 处理常见的别名情况
-        # 1. 单名是双名的简写：如"婉儿"是"林婉儿"的子串
+    def _flag_possible_aliases(self):
+        """Keep ambiguous names separate until source evidence is reviewed."""
         names = list(self.characters.keys())
-
         for i, name_a in enumerate(names):
-            for j, name_b in enumerate(names):
-                if i >= j:
-                    continue
-                if name_a not in self.characters or name_b not in self.characters:
-                    continue
-
-                # B是A的子串 → B可能是A的昵称
-                if len(name_b) < len(name_a) and name_b in name_a:
-                    self._merge_characters(name_b, name_a)
-                elif len(name_a) < len(name_b) and name_a in name_b:
-                    self._merge_characters(name_a, name_b)
-
-    def _merge_characters(self, from_name: str, to_name: str):
-        """将 from_name 的信息合并到 to_name"""
-        if from_name not in self.characters or to_name not in self.characters:
-            return
-
-        from_char = self.characters[from_name]
-        to_char = self.characters[to_name]
-
-        to_char["aliases"].append(from_char["name"])
-        to_char["dialogues"].extend(from_char["dialogues"])
-        to_char["appearance_count"] += from_char["appearance_count"]
-
-        self.aliases_map[from_name] = to_name
-        del self.characters[from_name]
+            for name_b in names[i + 1:]:
+                if name_a in name_b or name_b in name_a:
+                    self.alias_notes.append(f"称呼“{name_a}”与“{name_b}”存在名称包含关系；暂保留独立人物，须凭源材料确认是否为别名。")
 
     def _extract_character_info(self):
         """从文本中提取每个角色的详细信息"""
@@ -334,7 +303,7 @@ class CharacterExtractor:
                 "extraction_notes": [
                     "自动提取仅识别对白人物与基础语言特征；其他字段保持未知，等待证据复核或授权补全。",
                     "id 仅为本份结果的兼容序号；extraction_id 用于区分提取记录，重新提取后需按证据映射稳定 asset_id。",
-                ],
+                ] + self.alias_notes,
             },
             "characters": characters_output,
         }

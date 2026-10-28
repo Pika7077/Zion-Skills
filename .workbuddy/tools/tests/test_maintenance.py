@@ -107,6 +107,43 @@ class SyncTests(Isolated):
         self.assertEqual(self.inventory(self.source), self.inventory(self.targets['codex']))
         self.assertEqual(other, self.inventory(self.targets['workbuddy']))
 
+    def test_missing_referenced_subtree_does_not_delete_installed_rules(self):
+        skill = self.sync.SKILLS[-1]
+        (self.source/skill/'SKILL.md').write_text('[规则](references/rules.md)', encoding='utf-8')
+        for target in self.targets.values():
+            rules = target/skill/'references/rules.md'
+            rules.parent.mkdir()
+            rules.write_text('keep installed rules', encoding='utf-8')
+        before = self.inventory(self.base)
+        self.assertNotEqual(self.run_sync(), 0)
+        self.assertEqual(before, self.inventory(self.base))
+
+    def test_missing_nested_reference_blocks_sync(self):
+        (self.source/self.sync.SKILLS[-1]/'reference.md').write_text('[更多](missing.md)', encoding='utf-8')
+        before = self.inventory(self.base)
+        self.assertNotEqual(self.run_sync(), 0)
+        self.assertEqual(before, self.inventory(self.base))
+
+    def test_missing_entry_script_blocks_sync(self):
+        (self.source/self.sync.SKILLS[-1]/'SKILL.md').write_text('python scripts/missing.py input.json', encoding='utf-8')
+        before = self.inventory(self.base)
+        self.assertNotEqual(self.run_sync(), 0)
+        self.assertEqual(before, self.inventory(self.base))
+
+    def test_invalid_markdown_encoding_blocks_sync(self):
+        (self.source/self.sync.SKILLS[-1]/'reference.md').write_bytes(b'\xff\xfe')
+        before = self.inventory(self.base)
+        self.assertNotEqual(self.run_sync(), 0)
+        self.assertEqual(before, self.inventory(self.base))
+
+    def test_external_and_same_file_links_are_allowed(self):
+        (self.source/self.sync.SKILLS[-1]/'SKILL.md').write_text('# Entry\n[本站](#entry) [外部](https://example.org/rules)', encoding='utf-8')
+        self.assertEqual(self.run_sync('--target', 'codex'), 0)
+
+    def test_repository_sources_pass_preflight(self):
+        self.sync.ROOT = str(TOOLS.parents[1])
+        self.assertEqual(self.run_sync('--dry'), 0)
+
 
 RUNNER = '''
 import importlib.util, pathlib, sys, time

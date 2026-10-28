@@ -326,6 +326,52 @@ class Regression(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn('bad.json', result.stdout)
 
+    def test_validate_rejects_wrong_required_text_field_types(self):
+        for field in ('framing', 'camera_movement', 'lighting', 'description'):
+            for value in ([], {}, True, 42, None, '  '):
+                with self.subTest(field=field, value=value):
+                    data = fixture()
+                    data['shots'][0][field] = value
+                    self.assertTrue(validate_payload(data)[0])
+
+    def test_validate_requires_positive_integer_shot_number(self):
+        for value in (True, '1', 0, -1, 1.5):
+            data = fixture()
+            data['shots'][0]['shot_number'] = value
+            self.assertTrue(validate_payload(data)[0])
+
+    def test_validate_requires_finite_increasing_nonnegative_timing(self):
+        for timing in ({}, {'start': 0}, {'start': False, 'end': 1},
+                       {'start': '0', 'end': 1}, {'start': -1, 'end': 1},
+                       {'start': 1, 'end': 1}, {'start': 2, 'end': 1},
+                       {'start': 0, 'end': float('inf')}, {'start': float('nan'), 'end': 1}):
+            with self.subTest(timing=timing):
+                data = fixture()
+                data['shots'][0]['time_range'] = timing
+                self.assertTrue(validate_payload(data)[0])
+        data = fixture()
+        data['shots'][0]['time_range'] = {'start': 0, 'end': .5}
+        self.assertEqual(validate_payload(data)[0], [])
+
+    def test_validate_rejects_non_string_generation_prompt_without_crashing(self):
+        for field in ('generation_prompt', 'seedance_prompt'):
+            data = fixture()
+            data['shots'][0][field] = ['not text']
+            self.assertTrue(validate_payload(data)[0])
+
+    def test_cli_rejects_empty_timing_and_list_description(self):
+        data = fixture()
+        data['shots'][0]['time_range'] = {}
+        data['shots'][0]['description'] = []
+        with tempfile.TemporaryDirectory() as td:
+            file = Path(td)/'invalid-fields.json'
+            file.write_text(json.dumps(data), encoding='utf-8')
+            result = subprocess.run([sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'export_output.py'), str(file), '--validate'], capture_output=True, text=True, encoding='utf-8')
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('time_range', result.stdout)
+            self.assertIn('description', result.stdout)
+            self.assertNotIn('Traceback', result.stderr)
+
 
 if __name__=='__main__':
     unittest.main()

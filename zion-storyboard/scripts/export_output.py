@@ -14,7 +14,7 @@ import json
 import os
 import re
 from datetime import datetime
-from storyboard_audit import audit_assets, audit_content, audit_timing
+from storyboard_audit import audit_assets, audit_content, audit_timing, number
 
 # 观察方式：字段名 pov_family 沿用旧名以兼容历史数据；取值现直接写名称（不用 V 代号）。
 # 下表仅在读到旧代号时用于翻出可读名称。
@@ -146,13 +146,24 @@ def validate_shot(shot: dict, require_prompt: bool = False) -> list:
     if not isinstance(shot, dict):
         return ['镜头必须是对象']
     errors = []
-    required = ['shot_number', 'time_range', 'framing', 'camera_movement', 'lighting', 'description']
-    for field in required:
-        if field not in shot or shot[field] is None or not str(shot[field]).strip():
-            errors.append(f"镜头 {shot.get('shot_number', '?')} 缺少字段: {field}")
-    if str(shot.get('lighting') or '').strip() == '同上':
+    label = f"镜头 {shot.get('shot_number', '?')}"
+    if type(shot.get('shot_number')) is not int or shot['shot_number'] <= 0:
+        errors.append(f'{label} 的 shot_number 必须为正整数')
+    for field in ('framing', 'camera_movement', 'lighting', 'description'):
+        if not isinstance(shot.get(field), str) or not shot[field].strip():
+            errors.append(f'{label} 的 {field} 必须为非空字符串')
+    timing = shot.get('time_range')
+    if not isinstance(timing, dict) or not all(number(timing.get(key)) for key in ('start', 'end')):
+        errors.append(f'{label} 的 time_range 必须包含有限数值 start 和 end')
+    elif timing['start'] < 0 or timing['end'] <= timing['start']:
+        errors.append(f'{label} 的 time_range 需要 0 <= start < end')
+    for field in ('generation_prompt', 'seedance_prompt'):
+        if field in shot and shot[field] is not None and not isinstance(shot[field], str):
+            errors.append(f'{label} 的 {field} 必须为字符串')
+    if shot.get('lighting') == '同上':
         errors.append(f"镜头 {shot.get('shot_number', '?')} 的 lighting 不能只写同上")
-    if require_prompt and not generation_prompt(shot).strip():
+    prompt = generation_prompt(shot)
+    if require_prompt and (not isinstance(prompt, str) or not prompt.strip()):
         errors.append(f"镜头 {shot.get('shot_number', '?')} 缺少 generation_prompt/seedance_prompt")
     return errors
 
@@ -177,8 +188,6 @@ def validate_document(data):
     errors = []
     for shot in shots:
         errors.extend(validate_shot(shot, require_prompt=require_prompt))
-        if not isinstance(shot.get('time_range'), dict):
-            errors.append(f"镜头 {shot.get('shot_number', '?')} 的 time_range 必须是对象")
     errors.extend(audit_assets(data)['issues'])
     return errors
 
