@@ -48,15 +48,15 @@ zion-qa              投喂前检查与生成后验收
 
 ```text
 请安装 Zion 技能家族：zion-script、zion-assets、zion-storyboard、zion-qa。
-仓库：https://gitee.com/ZionZhang/zion-skills
+仓库：https://github.com/Pika7077/Zion-Skills
 
 先检查当前环境、实际技能目录和已有安装。若这是开发工作区（有
 .workbuddy/tools/ 和 CHANGELOG.md），不要用下载副本覆盖本地源文件。
 已安装且与源一致时只验证；有差异时先备份，再更新安装副本。
 
 取包到临时目录，任选一种：
-  curl -fL -o zion.zip https://gitee.com/ZionZhang/zion-skills/repository/archive/main.zip
-  git clone --depth 1 https://gitee.com/ZionZhang/zion-skills.git
+  curl -fL -o zion.zip https://github.com/Pika7077/Zion-Skills/archive/refs/heads/main.zip
+  git clone --depth 1 https://github.com/Pika7077/Zion-Skills.git
 归档下载后检查是否为有效 ZIP；失败则用 git，不反复下载同一错误页面。
 
 确认当前工具实际扫描的技能目录，再复制所需技能的完整目录。

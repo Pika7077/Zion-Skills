@@ -4,6 +4,7 @@
 接收文本内容（剧本/对白/视频ASR文本），识别人物并生成结构化 JSON。
 """
 
+import argparse
 import sys
 import json
 import re
@@ -309,29 +310,62 @@ class CharacterExtractor:
         }
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python extract_characters.py <text_file_or_content> [--source-type 剧本|视频]")
-        sys.exit(1)
-
-    input_arg = sys.argv[1]
-    source_type = "剧本"
-    for i, arg in enumerate(sys.argv):
-        if arg == "--source-type" and i + 1 < len(sys.argv):
-            source_type = sys.argv[i + 1]
-
-    input_path = Path(input_arg)
-    if input_path.is_file():
-        with input_path.open("r", encoding="utf-8") as f:
-            text = f.read()
-        source_file = input_path.name
-        file_type = input_path.suffix.lower().lstrip(".") or "txt"
+def read_source(input_arg, input_format='auto'):
+    """Accept text or the typed text result emitted by parse_input.py."""
+    source_file, file_type = 'inline-input', 'txt'
+    if input_arg == '-':
+        content = sys.stdin.read()
+        source_file = 'stdin'
     else:
-        text = input_arg
-        source_file = "inline-input"
-        file_type = "txt"
+        input_path = Path(input_arg)
+        try:
+            is_file = input_path.is_file()
+        except OSError:
+            is_file = False
+        if is_file:
+            content = input_path.read_text(encoding='utf-8-sig')
+            source_file = input_path.name
+            file_type = input_path.suffix.lower().lstrip('.') or 'txt'
+        else:
+            if input_path.suffix.lower() == '.json' and input_format != 'text' and not input_arg.lstrip().startswith(('{', '[')):
+                raise ValueError('JSON 输入文件不存在：' + input_arg)
+            content = input_arg
+    parsed_json = input_format == 'parsed-json' or (input_format == 'auto' and file_type == 'json')
+    if input_format == 'auto' and not parsed_json and content.lstrip().startswith(('{', '[')):
+        try:
+            json.loads(content)
+        except json.JSONDecodeError:
+            pass  # Bracketed stage directions are ordinary text, not malformed JSON.
+        else:
+            parsed_json = True
+    if parsed_json:
+        payload = json.loads(content)
+        if not isinstance(payload, dict) or payload.get('type') != 'text':
+            raise ValueError('需要 parse_input.py 的文本结果；视频结果需先转写为正文')
+        text = payload.get('text')
+        if not isinstance(text, str) or not text.strip() or text.lstrip().startswith('[WARNING]'):
+            raise ValueError('上游解析结果没有可用正文，不能提取人物')
+        source_file = payload.get('source_file', source_file)
+        file_type = payload.get('file_type', 'txt')
+        if not all(isinstance(value, str) and value.strip() for value in (source_file, file_type)):
+            raise ValueError('source_file 和 file_type 必须为非空字符串')
+        return text, source_file, file_type
+    if not content.strip():
+        raise ValueError('输入正文为空')
+    return content, source_file, file_type
 
-    extractor = CharacterExtractor(text, source_type, source_file, file_type)
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    parser.add_argument('input', help='文本文件、解析器 JSON、正文；- 从标准输入读取')
+    parser.add_argument('--source-type', default='剧本')
+    parser.add_argument('--input-format', choices=('auto', 'text', 'parsed-json'), default='auto')
+    args = parser.parse_args()
+    try:
+        text, source_file, file_type = read_source(args.input, args.input_format)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+    extractor = CharacterExtractor(text, args.source_type, source_file, file_type)
     result = extractor.extract()
 
     print(json.dumps(result, ensure_ascii=False, indent=2))

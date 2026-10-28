@@ -13,7 +13,7 @@
 | 归档 | `.workbuddy/archive/`；索引见该目录 `README.md`，按问题回溯 |
 | 手册 | `Zion技能使用手册.md` |
 | 版本与变更记录 | `CHANGELOG.md` |
-| Git 仓库 | 工作区根目录，`main` 分支；远端 `origin` 指向 Gitee（HTTPS，推送命令与凭据注意事项见 `.workbuddy/memory/MEMORY.md`）；`.workbuddy/locks`、`.workbuddy/state` 与嵌套仓库 `codex-skills/` 不入库 |
+| Git 仓库 | 工作区根目录，`main` 分支；发布仓库为 `https://github.com/Pika7077/Zion-Skills`，实际检出远端用 `git remote -v` 核对；`.workbuddy/locks`、`.workbuddy/state` 与嵌套仓库 `codex-skills/` 不入库 |
 | 长期约定与事实 | `.workbuddy/memory/MEMORY.md` |
 | 单一来源地图（风格／色彩／镜头／声音等内容归属哪一档） | `.workbuddy/memory/style-single-source.md` |
 | 学习资料的归类与吸收规则（外部材料怎么判归属、怎么判该不该吸收） | `.workbuddy/memory/material-intake.md` |

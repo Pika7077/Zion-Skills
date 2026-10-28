@@ -311,6 +311,11 @@ def main():
         print('错误：文件不存在 - ' + args.file_path, file=sys.stderr)
         sys.exit(1)
 
+    if args.output:
+        same_path = os.path.normcase(os.path.realpath(args.output)) == os.path.normcase(os.path.realpath(args.file_path))
+        if same_path or (os.path.exists(args.output) and os.path.samefile(args.file_path, args.output)):
+            parser.error('输出文件不能与输入文件相同；请使用新的文件名')
+
     if args.type == 'auto':
         ext = os.path.splitext(args.file_path)[1].lower()
         type_map = {
@@ -334,7 +339,7 @@ def main():
     else:
         parsers = {'pdf': parse_pdf, 'docx': parse_docx, 'txt': parse_txt}
         text = parsers.get(file_type, parse_txt)(args.file_path)
-        result = {'type': 'text', 'file_type': file_type, 'text': text}
+        result = {'type': 'text', 'file_type': file_type, 'source_file': Path(args.file_path).name, 'text': text}
 
         if args.structure and text:
             result['structure'] = parse_script_structure(text)

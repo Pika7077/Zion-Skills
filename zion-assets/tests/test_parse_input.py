@@ -127,6 +127,36 @@ class ParserRegression(unittest.TestCase):
             self.assertEqual(result.returncode, 2)
         self.assertFalse((self.base/'frames').exists())
 
+    def test_cli_output_cannot_replace_input(self):
+        source = self.base/'scene.txt'
+        source.write_text('林岚：签了。', encoding='utf-8')
+        before = source.read_bytes()
+        for output in (source, source.parent/'.'/source.name):
+            result = subprocess.run([sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'parse_input.py'), str(source), '--output', str(output)], capture_output=True)
+            self.assertEqual(result.returncode, 2)
+            self.assertEqual(source.read_bytes(), before)
+
+    def test_file_identity_alias_is_rejected_before_writing(self):
+        source, alias = self.base/'scene.txt', self.base/'alias.txt'
+        source.write_text('source body', encoding='utf-8')
+        alias.write_text('alias fixture', encoding='utf-8')
+        # Restricted Windows hosts may prohibit creating actual hardlinks.
+        with patch.object(sys, 'argv', ['parse_input.py', str(source), '--output', str(alias)]), patch.object(parser.os.path, 'samefile', return_value=True), redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as result:
+            parser.main()
+        self.assertEqual(result.exception.code, 2)
+        self.assertEqual(source.read_text(), 'source body')
+        self.assertEqual(alias.read_text(), 'alias fixture')
+
+    def test_cli_text_result_retains_original_source_name(self):
+        import json
+        source = self.base/'scene.txt'
+        source.write_text('林岚：签了。', encoding='utf-8')
+        result = subprocess.run([sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'parse_input.py'), str(source)], capture_output=True, text=True, encoding='utf-8')
+        self.assertEqual(result.returncode, 0)
+        data = json.loads(result.stdout)
+        self.assertEqual(data['source_file'], 'scene.txt')
+        self.assertEqual(data['text'], '林岚：签了。')
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,9 @@
 """Schema-level regression tests for the deterministic character extractor."""
 from pathlib import Path
 import sys
+import json
+import subprocess
+import tempfile
 import unittest
 from uuid import UUID
 
@@ -87,6 +90,58 @@ class CharacterSchemaRegression(unittest.TestCase):
         first, second = extractor.extract(), extractor.extract()
         self.assertEqual(first['meta']['extraction_notes'], second['meta']['extraction_notes'])
         self.assertEqual(len(first['characters']), 2)
+
+    def run_cli(self, *args, stdin=None):
+        return subprocess.run([sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'extract_characters.py'), *map(str,args)], input=stdin, capture_output=True, text=True, encoding='utf-8', timeout=10)
+
+    def test_cli_parser_json_preserves_body_and_source(self):
+        with tempfile.TemporaryDirectory() as td:
+            file, parsed = Path(td)/'scene.txt', Path(td)/'parsed.json'
+            file.write_text('林岚：签了。\n周衡：不签。', encoding='utf-8')
+            converted = subprocess.run([sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'parse_input.py'), str(file), '--output', str(parsed)], capture_output=True)
+            self.assertEqual(converted.returncode, 0)
+            result = self.run_cli(parsed)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            data = json.loads(result.stdout)
+            self.assertEqual({c['name'] for c in data['characters']}, {'林岚','周衡'})
+            self.assertEqual((data['meta']['source_file'], data['meta']['file_type']), ('scene.txt','txt'))
+
+    def test_cli_parser_stdout_can_feed_extractor_stdin(self):
+        payload = {'type':'text', 'file_type':'docx', 'source_file':'scene.docx', 'text':'林岚：签了。'}
+        result = self.run_cli('-', stdin=json.dumps(payload))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        data = json.loads(result.stdout)
+        self.assertEqual(data['characters'][0]['name'], '林岚')
+        self.assertEqual(data['meta']['source_file'], 'scene.docx')
+        self.assertEqual(data['meta']['file_type'], 'docx')
+
+    def test_cli_rejects_unusable_parser_payloads(self):
+        for payload in ([42], {'type':'video', 'metadata':{}},
+                        {'type':'text','text':''}, {'type':'text','text':[]},
+                        {'type':'text','text':'[WARNING] No usable text'}):
+            with self.subTest(payload=payload):
+                result = self.run_cli('-', stdin=json.dumps(payload))
+                self.assertEqual(result.returncode, 2)
+                self.assertEqual(result.stdout, '')
+
+    def test_cli_raw_text_is_still_supported(self):
+        result = self.run_cli('林岚：签了。', '--input-format', 'text', '--source-type', '剧本')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)['characters'][0]['name'], '林岚')
+
+    def test_cli_malformed_or_missing_json_is_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            file = Path(td)/'invalid.json'
+            file.write_text('{bad', encoding='utf-8')
+            for path in (file, Path(td)/'missing.json'):
+                result = self.run_cli(path)
+                self.assertEqual(result.returncode, 2)
+                self.assertEqual(result.stdout, '')
+
+    def test_auto_detection_keeps_bracketed_stage_directions_as_text(self):
+        result = self.run_cli('[场景1]\n林岚：签了。\n周衡：不签。')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual({c['name'] for c in json.loads(result.stdout)['characters']}, {'林岚','周衡'})
 
 
 if __name__ == "__main__":
