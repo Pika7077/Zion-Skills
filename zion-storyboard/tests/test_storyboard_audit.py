@@ -5,10 +5,11 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
-from export_output import audit_assets, audit_variety, audit_fidelity, generate_markdown, validate_shot
+from export_output import audit_assets, audit_variety, audit_fidelity, generate_markdown, validate_shot, validate_payload, ensure_separate_output
 
 
 def fixture():
@@ -277,6 +278,189 @@ class Regression(unittest.TestCase):
         self.assertIn('### 镜头1（0-10秒）：特写', with_time)
         self.assertIn('### 镜头1：特写', without)
         self.assertNotIn('（0-10秒）', without)
+
+    def test_validate_rejects_invalid_top_level_and_nested_types(self):
+        payloads = [None, 42, 'text', [], [42], {}, {'results': None},
+                    {'shots': [42]}, {'meta': [], 'shots': [{}]},
+                    {'meta': {'asset_mode': []}, 'shots': [{}]},
+                    {'shots': 'not a list'}]
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                self.assertTrue(validate_payload(payload)[0])
+
+    def test_validate_accepts_single_list_wrapper_and_exported_batch(self):
+        d = fixture()
+        wrapper = {'file': 'scene', 'status': 'success', 'data': d}
+        for payload in (d, [d], [wrapper], {'batch_meta': {}, 'results': [wrapper]}):
+            with self.subTest(payload_type=type(payload).__name__):
+                self.assertEqual(validate_payload(payload), ([], 1))
+
+    def test_validate_checks_every_batch_item_and_reports_file(self):
+        valid = fixture()
+        bad = self.asset_fixture()
+        bad['shots'][0]['character_refs'] = ['@MISSING']
+        payload = [{'file': 'good.json', 'status': 'success', 'data': valid},
+                   {'file': 'bad.json', 'status': 'success', 'data': bad}]
+        errors, count = validate_payload(payload)
+        self.assertEqual(count, 2)
+        self.assertTrue(any('bad.json' in error and '@MISSING' in error for error in errors))
+        self.assertTrue(validate_payload([{'file': 'failed', 'status': 'error', 'error': 'cannot parse', 'data': valid}])[0])
+
+    def test_cli_validate_invalid_list_exits_nonzero(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td) / 'invalid.json'
+            p.write_text('[42]', encoding='utf-8')
+            result = subprocess.run([sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'export_output.py'), str(p), '--validate'], capture_output=True, text=True, encoding='utf-8')
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('第 1 项', result.stdout)
+            self.assertNotIn('Traceback', result.stderr)
+
+    def test_cli_batch_validation_rejects_empty_and_invalid_directory(self):
+        with tempfile.TemporaryDirectory() as td:
+            directory = Path(td)
+            cmd = [sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'export_output.py'), td, '--batch', '--validate']
+            self.assertNotEqual(subprocess.run(cmd, capture_output=True).returncode, 0)
+            (directory/'good.json').write_text(json.dumps(fixture()), encoding='utf-8')
+            self.assertEqual(subprocess.run(cmd, capture_output=True).returncode, 0)
+            (directory/'bad.json').write_text('[42]', encoding='utf-8')
+            result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8')
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('bad.json', result.stdout)
+
+    def test_validate_rejects_wrong_required_text_field_types(self):
+        for field in ('framing', 'camera_movement', 'lighting', 'description'):
+            for value in ([], {}, True, 42, None, '  '):
+                with self.subTest(field=field, value=value):
+                    data = fixture()
+                    data['shots'][0][field] = value
+                    self.assertTrue(validate_payload(data)[0])
+
+    def test_validate_requires_positive_integer_shot_number(self):
+        for value in (True, '1', 0, -1, 1.5):
+            data = fixture()
+            data['shots'][0]['shot_number'] = value
+            self.assertTrue(validate_payload(data)[0])
+
+    def test_validate_requires_finite_increasing_nonnegative_timing(self):
+        for timing in ({}, {'start': 0}, {'start': False, 'end': 1},
+                       {'start': '0', 'end': 1}, {'start': -1, 'end': 1},
+                       {'start': 1, 'end': 1}, {'start': 2, 'end': 1},
+                       {'start': 0, 'end': float('inf')}, {'start': float('nan'), 'end': 1}):
+            with self.subTest(timing=timing):
+                data = fixture()
+                data['shots'][0]['time_range'] = timing
+                self.assertTrue(validate_payload(data)[0])
+        data = fixture()
+        data['shots'][0]['time_range'] = {'start': 0, 'end': .5}
+        self.assertEqual(validate_payload(data)[0], [])
+
+    def test_validate_rejects_non_string_generation_prompt_without_crashing(self):
+        for field in ('generation_prompt', 'seedance_prompt'):
+            data = fixture()
+            data['shots'][0][field] = ['not text']
+            self.assertTrue(validate_payload(data)[0])
+
+    def test_cli_rejects_empty_timing_and_list_description(self):
+        data = fixture()
+        data['shots'][0]['time_range'] = {}
+        data['shots'][0]['description'] = []
+        with tempfile.TemporaryDirectory() as td:
+            file = Path(td)/'invalid-fields.json'
+            file.write_text(json.dumps(data), encoding='utf-8')
+            result = subprocess.run([sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'export_output.py'), str(file), '--validate'], capture_output=True, text=True, encoding='utf-8')
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('time_range', result.stdout)
+            self.assertIn('description', result.stdout)
+            self.assertNotIn('Traceback', result.stderr)
+
+    def run_export_cli(self, source, *args):
+        return subprocess.run([sys.executable, '-B', '-X', 'utf8', str(SCRIPTS/'export_output.py'), str(source), *map(str,args)], capture_output=True, text=True, encoding='utf-8', timeout=10)
+
+    def test_combined_checks_export_markdown_only_after_success(self):
+        with tempfile.TemporaryDirectory() as td:
+            source, output = Path(td)/'source.json', Path(td)/'output.md'
+            source.write_text(json.dumps(fixture()), encoding='utf-8')
+            for check in ('--audit', '--fidelity'):
+                result = self.run_export_cli(source, '--validate', check, '--output', output)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertIn('验证通过', result.stderr)
+                self.assertIn('### 镜头1', output.read_text(encoding='utf-8'))
+
+    def test_audit_failure_after_validation_preserves_existing_output(self):
+        with tempfile.TemporaryDirectory() as td:
+            source, output = Path(td)/'source.json', Path(td)/'output.md'
+            data = fixture()
+            data['shots'][1]['time_range'] = {'start':0, 'end':10}
+            source.write_text(json.dumps(data), encoding='utf-8')
+            output.write_text('previous deliverable', encoding='utf-8')
+            result = self.run_export_cli(source, '--validate', '--audit', '--output', output)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn('验证通过', result.stderr)
+            self.assertEqual(output.read_text(), 'previous deliverable')
+
+    def test_validation_failure_never_exports(self):
+        with tempfile.TemporaryDirectory() as td:
+            source, output = Path(td)/'source.json', Path(td)/'output.md'
+            source.write_text('[42]', encoding='utf-8')
+            result = self.run_export_cli(source, '--validate', '--audit', '--output', output)
+            self.assertEqual(result.returncode, 1)
+            self.assertFalse(output.exists())
+
+    def test_combined_check_only_mode_does_not_export(self):
+        with tempfile.TemporaryDirectory() as td:
+            source = Path(td)/'source.json'
+            source.write_text(json.dumps(fixture()), encoding='utf-8')
+            result = self.run_export_cli(source, '--validate', '--audit')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('验证通过', result.stdout)
+            self.assertNotIn('### 镜头', result.stdout)
+
+    def test_json_stdout_export_is_not_contaminated_by_check_reports(self):
+        with tempfile.TemporaryDirectory() as td:
+            source = Path(td)/'source.json'
+            data = fixture()
+            source.write_text(json.dumps(data), encoding='utf-8')
+            result = self.run_export_cli(source, '--validate', '--audit', '--format', 'json')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertEqual(json.loads(result.stdout), data)
+            self.assertIn('验证通过', result.stderr)
+
+    def test_output_cannot_replace_input_json(self):
+        with tempfile.TemporaryDirectory() as td:
+            source = Path(td)/'source.json'
+            source.write_text(json.dumps(fixture()), encoding='utf-8')
+            before = source.read_bytes()
+            result = self.run_export_cli(source, '--format', 'markdown', '--output', source)
+            self.assertEqual(result.returncode, 2)
+            self.assertEqual(source.read_bytes(), before)
+
+    def test_batch_output_cannot_replace_any_source(self):
+        with tempfile.TemporaryDirectory() as td:
+            source = Path(td)/'source.JSON'
+            source.write_text(json.dumps(fixture()), encoding='utf-8')
+            before = source.read_bytes()
+            result = self.run_export_cli(td, '--batch', '--output', source)
+            self.assertEqual(result.returncode, 2)
+            self.assertEqual(source.read_bytes(), before)
+
+    def test_file_identity_alias_is_rejected(self):
+        with tempfile.TemporaryDirectory() as td:
+            source, alias = Path(td)/'source.json', Path(td)/'alias.md'
+            source.write_text('{}', encoding='utf-8')
+            alias.write_text('keep output', encoding='utf-8')
+            with patch('export_output.os.path.samefile', return_value=True), self.assertRaises(ValueError):
+                ensure_separate_output(str(alias), [str(source)])
+            self.assertEqual(source.read_text(), '{}')
+            self.assertEqual(alias.read_text(), 'keep output')
+
+    def test_exported_batch_wrapper_supports_combined_checks_and_export(self):
+        with tempfile.TemporaryDirectory() as td:
+            source, output = Path(td)/'batch.json', Path(td)/'batch.md'
+            data = {'batch_meta':{}, 'results':[{'file':'scene.json','status':'success','data':fixture()}]}
+            source.write_text(json.dumps(data), encoding='utf-8')
+            result = self.run_export_cli(source, '--validate', '--audit', '--output', output)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('### 镜头1', output.read_text(encoding='utf-8'))
 
 
 if __name__=='__main__':

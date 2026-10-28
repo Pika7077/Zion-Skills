@@ -4,6 +4,7 @@
 接收文本内容（剧本/对白/视频ASR文本），识别人物并生成结构化 JSON。
 """
 
+import argparse
 import sys
 import json
 import re
@@ -27,21 +28,21 @@ class CharacterExtractor:
         self.file_type = file_type
         self.lines = text.splitlines()
         self.characters = {}  # name -> info dict
-        self.aliases_map = {}  # 别名 -> 正式名
+        self.alias_notes = []
 
     def extract(self) -> dict:
         """主提取流程"""
         # 每次提取生成独立结果，复用实例时也不累加上次的对白。
         self.characters = {}
-        self.aliases_map = {}
+        self.alias_notes = []
         # Step 1: 识别剧本结构
         scene_blocks = self._split_scenes()
 
         # Step 2: 识别所有出场人物
         self._identify_characters(scene_blocks)
 
-        # Step 3: 合并同一个人物的不同称呼
-        self._merge_aliases()
+        # Step 3: 标出待核实的称呼，名称包含关系不构成合并证据。
+        self._flag_possible_aliases()
 
         # Step 4: 提取每个角色的详细信息
         self._extract_character_info()
@@ -81,12 +82,7 @@ class CharacterExtractor:
     def _identify_characters(self, scene_blocks: list):
         """从场景块中识别所有人物"""
         # 对白模式：角色名后跟对白
-        dialogue_pattern = re.compile(r'^([^\s：（(]{1,8})[：:](.*)')
-
-        # 叙述提及模式
-        mention_patterns = [
-            re.compile(r'([^\s，。,\.]{2,4})(?:说|道|问|答|喊|叫|吼|叫喊)'),
-        ]
+        dialogue_pattern = re.compile(r'^([^\s：（(:]{1,8})\s*(?:（[^）]*）\s*|\([^)]*\)\s*)*[：:](.*)')
 
         for block in scene_blocks:
             lines = block.splitlines()
@@ -128,39 +124,13 @@ class CharacterExtractor:
         """标准化人物名，去除空格和标点"""
         return re.sub(r'[\s（）()\[\]【】""'']', '', name).strip()
 
-    def _merge_aliases(self):
-        """合并同一人物的不同称呼"""
-        # 处理常见的别名情况
-        # 1. 单名是双名的简写：如"婉儿"是"林婉儿"的子串
+    def _flag_possible_aliases(self):
+        """Keep ambiguous names separate until source evidence is reviewed."""
         names = list(self.characters.keys())
-
         for i, name_a in enumerate(names):
-            for j, name_b in enumerate(names):
-                if i >= j:
-                    continue
-                if name_a not in self.characters or name_b not in self.characters:
-                    continue
-
-                # B是A的子串 → B可能是A的昵称
-                if len(name_b) < len(name_a) and name_b in name_a:
-                    self._merge_characters(name_b, name_a)
-                elif len(name_a) < len(name_b) and name_a in name_b:
-                    self._merge_characters(name_a, name_b)
-
-    def _merge_characters(self, from_name: str, to_name: str):
-        """将 from_name 的信息合并到 to_name"""
-        if from_name not in self.characters or to_name not in self.characters:
-            return
-
-        from_char = self.characters[from_name]
-        to_char = self.characters[to_name]
-
-        to_char["aliases"].append(from_char["name"])
-        to_char["dialogues"].extend(from_char["dialogues"])
-        to_char["appearance_count"] += from_char["appearance_count"]
-
-        self.aliases_map[from_name] = to_name
-        del self.characters[from_name]
+            for name_b in names[i + 1:]:
+                if name_a in name_b or name_b in name_a:
+                    self.alias_notes.append(f"称呼“{name_a}”与“{name_b}”存在名称包含关系；暂保留独立人物，须凭源材料确认是否为别名。")
 
     def _extract_character_info(self):
         """从文本中提取每个角色的详细信息"""
@@ -334,35 +304,68 @@ class CharacterExtractor:
                 "extraction_notes": [
                     "自动提取仅识别对白人物与基础语言特征；其他字段保持未知，等待证据复核或授权补全。",
                     "id 仅为本份结果的兼容序号；extraction_id 用于区分提取记录，重新提取后需按证据映射稳定 asset_id。",
-                ],
+                ] + self.alias_notes,
             },
             "characters": characters_output,
         }
 
 
-def main():
-    if len(sys.argv) < 2:
-        print("Usage: python extract_characters.py <text_file_or_content> [--source-type 剧本|视频]")
-        sys.exit(1)
-
-    input_arg = sys.argv[1]
-    source_type = "剧本"
-    for i, arg in enumerate(sys.argv):
-        if arg == "--source-type" and i + 1 < len(sys.argv):
-            source_type = sys.argv[i + 1]
-
-    input_path = Path(input_arg)
-    if input_path.is_file():
-        with input_path.open("r", encoding="utf-8") as f:
-            text = f.read()
-        source_file = input_path.name
-        file_type = input_path.suffix.lower().lstrip(".") or "txt"
+def read_source(input_arg, input_format='auto'):
+    """Accept text or the typed text result emitted by parse_input.py."""
+    source_file, file_type = 'inline-input', 'txt'
+    if input_arg == '-':
+        content = sys.stdin.read()
+        source_file = 'stdin'
     else:
-        text = input_arg
-        source_file = "inline-input"
-        file_type = "txt"
+        input_path = Path(input_arg)
+        try:
+            is_file = input_path.is_file()
+        except OSError:
+            is_file = False
+        if is_file:
+            content = input_path.read_text(encoding='utf-8-sig')
+            source_file = input_path.name
+            file_type = input_path.suffix.lower().lstrip('.') or 'txt'
+        else:
+            if input_path.suffix.lower() == '.json' and input_format != 'text' and not input_arg.lstrip().startswith(('{', '[')):
+                raise ValueError('JSON 输入文件不存在：' + input_arg)
+            content = input_arg
+    parsed_json = input_format == 'parsed-json' or (input_format == 'auto' and file_type == 'json')
+    if input_format == 'auto' and not parsed_json and content.lstrip().startswith(('{', '[')):
+        try:
+            json.loads(content)
+        except json.JSONDecodeError:
+            pass  # Bracketed stage directions are ordinary text, not malformed JSON.
+        else:
+            parsed_json = True
+    if parsed_json:
+        payload = json.loads(content)
+        if not isinstance(payload, dict) or payload.get('type') != 'text':
+            raise ValueError('需要 parse_input.py 的文本结果；视频结果需先转写为正文')
+        text = payload.get('text')
+        if not isinstance(text, str) or not text.strip() or text.lstrip().startswith('[WARNING]'):
+            raise ValueError('上游解析结果没有可用正文，不能提取人物')
+        source_file = payload.get('source_file', source_file)
+        file_type = payload.get('file_type', 'txt')
+        if not all(isinstance(value, str) and value.strip() for value in (source_file, file_type)):
+            raise ValueError('source_file 和 file_type 必须为非空字符串')
+        return text, source_file, file_type
+    if not content.strip():
+        raise ValueError('输入正文为空')
+    return content, source_file, file_type
 
-    extractor = CharacterExtractor(text, source_type, source_file, file_type)
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    parser.add_argument('input', help='文本文件、解析器 JSON、正文；- 从标准输入读取')
+    parser.add_argument('--source-type', default='剧本')
+    parser.add_argument('--input-format', choices=('auto', 'text', 'parsed-json'), default='auto')
+    args = parser.parse_args()
+    try:
+        text, source_file, file_type = read_source(args.input, args.input_format)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+    extractor = CharacterExtractor(text, args.source_type, source_file, file_type)
     result = extractor.extract()
 
     print(json.dumps(result, ensure_ascii=False, indent=2))

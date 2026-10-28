@@ -13,8 +13,10 @@ import argparse
 import json
 import os
 import re
+import sys
+from contextlib import nullcontext, redirect_stdout
 from datetime import datetime
-from storyboard_audit import audit_assets, audit_content, audit_timing
+from storyboard_audit import audit_assets, audit_content, audit_timing, number
 
 # 观察方式：字段名 pov_family 沿用旧名以兼容历史数据；取值现直接写名称（不用 V 代号）。
 # 下表仅在读到旧代号时用于翻出可读名称。
@@ -143,16 +145,77 @@ def asset_binding(asset: dict) -> str:
 
 def validate_shot(shot: dict, require_prompt: bool = False) -> list:
     """验证单个镜头的必要字段，返回错误列表"""
+    if not isinstance(shot, dict):
+        return ['镜头必须是对象']
     errors = []
-    required = ['shot_number', 'time_range', 'framing', 'camera_movement', 'lighting', 'description']
-    for field in required:
-        if field not in shot or shot[field] is None or not str(shot[field]).strip():
-            errors.append(f"镜头 {shot.get('shot_number', '?')} 缺少字段: {field}")
-    if str(shot.get('lighting') or '').strip() == '同上':
+    label = f"镜头 {shot.get('shot_number', '?')}"
+    if type(shot.get('shot_number')) is not int or shot['shot_number'] <= 0:
+        errors.append(f'{label} 的 shot_number 必须为正整数')
+    for field in ('framing', 'camera_movement', 'lighting', 'description'):
+        if not isinstance(shot.get(field), str) or not shot[field].strip():
+            errors.append(f'{label} 的 {field} 必须为非空字符串')
+    timing = shot.get('time_range')
+    if not isinstance(timing, dict) or not all(number(timing.get(key)) for key in ('start', 'end')):
+        errors.append(f'{label} 的 time_range 必须包含有限数值 start 和 end')
+    elif timing['start'] < 0 or timing['end'] <= timing['start']:
+        errors.append(f'{label} 的 time_range 需要 0 <= start < end')
+    for field in ('generation_prompt', 'seedance_prompt'):
+        if field in shot and shot[field] is not None and not isinstance(shot[field], str):
+            errors.append(f'{label} 的 {field} 必须为字符串')
+    if shot.get('lighting') == '同上':
         errors.append(f"镜头 {shot.get('shot_number', '?')} 的 lighting 不能只写同上")
-    if require_prompt and not generation_prompt(shot).strip():
+    prompt = generation_prompt(shot)
+    if require_prompt and (not isinstance(prompt, str) or not prompt.strip()):
         errors.append(f"镜头 {shot.get('shot_number', '?')} 缺少 generation_prompt/seedance_prompt")
     return errors
+
+
+def validate_document(data):
+    """Validate one document before helpers inspect nested metadata or shots."""
+    if not isinstance(data, dict):
+        return ['分镜必须是对象']
+    meta = data.get('meta', {})
+    if not isinstance(meta, dict):
+        return ['meta 必须是对象']
+    if meta.get('asset_mode') is not None and not isinstance(meta['asset_mode'], dict):
+        return ['meta.asset_mode 必须是对象']
+    shots = data.get('shots')
+    if not isinstance(shots, list) or not shots:
+        return ['shots 必须是非空列表']
+    if any(not isinstance(shot, dict) for shot in shots):
+        return ['shots 中每个镜头必须是对象']
+    require_prompt = meta.get('include_generation_prompts') is True or any(
+        generation_prompt(shot) for shot in shots
+    )
+    errors = []
+    for shot in shots:
+        errors.extend(validate_shot(shot, require_prompt=require_prompt))
+    errors.extend(audit_assets(data)['issues'])
+    return errors
+
+
+def validate_payload(data):
+    """Accept a document, document list, or exported batch; validate every item."""
+    if isinstance(data, dict) and 'results' in data:
+        targets = data['results']
+        if not isinstance(targets, list):
+            return ['results 必须是列表'], 0
+    else:
+        targets = data if isinstance(data, list) else [data]
+    if not targets:
+        return ['没有可验证的分镜'], 0
+    errors = []
+    for index, item in enumerate(targets, 1):
+        label = f'第 {index} 项'
+        document = item
+        if isinstance(item, dict) and ('data' in item or 'status' in item):
+            label += f"（{item.get('file', '未命名')}）"
+            if item.get('status', 'success') != 'success':
+                errors.append(f"{label}：处理失败：{item.get('error', item.get('status'))}")
+                continue
+            document = item.get('data')
+        errors.extend(f'{label}：{error}' for error in validate_document(document))
+    return errors, len(targets)
 
 
 def audit_legacy_variety(data: dict) -> dict:
@@ -638,6 +701,8 @@ def export_json(data, output_path: str = None) -> str:
 
 def export_markdown(data, output_path: str = None, show_shot_time: bool = True) -> str:
     """导出为 Markdown；show_shot_time=False 时隐藏逐镜时间码。"""
+    if isinstance(data, dict) and any(key in data for key in ('results', 'data', 'status')):
+        data = payload_items(data)
     if isinstance(data, list):
         md_str = generate_batch_markdown(data, show_shot_time=show_shot_time)
     else:
@@ -650,69 +715,61 @@ def export_markdown(data, output_path: str = None, show_shot_time: bool = True) 
     return md_str
 
 
-def main():
-    parser = argparse.ArgumentParser(description='分镜结果导出工具')
-    parser.add_argument('input', help='输入 JSON 文件或目录路径')
-    parser.add_argument('--format', '-f', choices=['json', 'markdown'],
-                        default='markdown', help='输出格式')
-    parser.add_argument('--output', '-o', help='输出文件路径')
-    parser.add_argument('--batch', '-b', action='store_true',
-                        help='批量模式（输入为目录）')
-    parser.add_argument('--validate', action='store_true',
-                        help='验证输出数据完整性')
-    parser.add_argument('--audit', action='store_true',
-                        help='结构、时间与容量检查；艺术质量须人工复核')
-    parser.add_argument('--fidelity', action='store_true',
-                        help='仅检查时间、容量和连续状态；不替代源文比对')
-    parser.add_argument('--no-shot-time', action='store_true',
-                        help='隐藏逐镜时间码，只保留整段/整组时长')
+def payload_items(data):
+    if isinstance(data, dict) and 'results' in data:
+        if not isinstance(data['results'], list):
+            raise ValueError('results 必须是列表')
+        return data['results']
+    return data if isinstance(data, list) else [data]
 
-    args = parser.parse_args()
 
-    # 加载数据
-    if args.batch and os.path.isdir(args.input):
-        results = []
-        for f in sorted(os.listdir(args.input)):
-            if f.endswith('.json'):
-                fpath = os.path.join(args.input, f)
-                with open(fpath, 'r', encoding='utf-8') as fp:
-                    data = json.load(fp)
-                results.append({'file': f, 'status': 'success', 'data': data})
-        data = results
-    else:
-        with open(args.input, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-
-    # 验证
-    if args.validate and not args.batch:
-        if isinstance(data, dict):
-            shots = data.get('shots', [])
-            errors = [] if shots else ['没有镜头']
-            require_prompt = data.get('meta', {}).get('include_generation_prompts') is True or any(
-                generation_prompt(shot) for shot in shots if isinstance(shot, dict)
-            )
-            for shot in shots:
-                errors.extend(validate_shot(shot, require_prompt=require_prompt))
-            errors.extend(audit_assets(data)['issues'])
-            if errors:
-                print("验证错误:")
-                for e in errors:
-                    print(f"  - {e}")
-                raise SystemExit(1)
-            else:
-                print(f"验证通过：{len(shots)} 个镜头数据完整")
+def ensure_separate_output(output_path, input_paths):
+    if not output_path:
         return
+    if os.path.isdir(output_path):
+        raise ValueError('输出位置必须是文件')
+    output = os.path.normcase(os.path.realpath(output_path))
+    for input_path in input_paths:
+        same_path = output == os.path.normcase(os.path.realpath(input_path))
+        same_file = os.path.exists(output_path) and os.path.samefile(input_path, output_path)
+        if same_path or same_file:
+            raise ValueError('输出文件不能覆盖任何输入文件；请使用新的文件名')
+
+
+def run_checks(data, args):
+    # 验证
+    if args.validate:
+        errors, count = validate_payload(data)
+        if errors:
+            print("验证错误:")
+            for error in errors:
+                print(f"  - {error}")
+            raise SystemExit(1)
+        print(f"验证通过：{count} 份分镜数据完整")
 
     # 审计
     if args.audit or args.fidelity:
-        targets = data if isinstance(data, list) else [data]
+        try:
+            targets = payload_items(data)
+        except ValueError as error:
+            print(str(error))
+            raise SystemExit(1)
         failed = not bool(targets)
         run_variety = args.audit
         for item in targets:
             if not isinstance(item, dict):
                 failed = True
                 continue
+            if ('data' in item or 'status' in item) and item.get('status', 'success') != 'success':
+                print(f"批次处理失败：{item.get('file', '未命名')}")
+                failed = True
+                continue
             item = item.get('data', item)
+            errors = validate_document(item)
+            if errors:
+                print('审计输入错误：' + '；'.join(errors))
+                failed = True
+                continue
             name = item.get('meta', {}).get('source_file', '未命名')
 
             if run_variety:
@@ -753,10 +810,61 @@ def main():
                 print("自动结构检查通过；仍需人工核对内容。")
         if failed:
             raise SystemExit(1)
+
+
+
+def main():
+    parser = argparse.ArgumentParser(description='分镜结果导出工具')
+    parser.add_argument('input', help='输入 JSON 文件或目录路径')
+    parser.add_argument('--format', '-f', choices=['json', 'markdown'],
+                        default=None, help='输出格式；显式指定时在检查通过后导出')
+    parser.add_argument('--output', '-o', help='输出文件路径')
+    parser.add_argument('--batch', '-b', action='store_true',
+                        help='批量模式（输入为目录）')
+    parser.add_argument('--validate', action='store_true',
+                        help='验证输出数据完整性')
+    parser.add_argument('--audit', action='store_true',
+                        help='结构、时间与容量检查；艺术质量须人工复核')
+    parser.add_argument('--fidelity', action='store_true',
+                        help='仅检查时间、容量和连续状态；不替代源文比对')
+    parser.add_argument('--no-shot-time', action='store_true',
+                        help='隐藏逐镜时间码，只保留整段/整组时长')
+
+    args = parser.parse_args()
+
+    if args.batch and not os.path.isdir(args.input):
+        parser.error('--batch 的输入必须是目录')
+
+    input_paths = [args.input]
+    if args.batch:
+        input_paths = [os.path.join(args.input, f) for f in sorted(os.listdir(args.input)) if f.lower().endswith('.json')]
+    try:
+        ensure_separate_output(args.output, input_paths)
+    except (OSError, ValueError) as error:
+        parser.error(str(error))
+
+    # 加载数据
+    if args.batch and os.path.isdir(args.input):
+        results = []
+        for fpath in input_paths:
+            with open(fpath, 'r', encoding='utf-8') as fp:
+                data = json.load(fp)
+            results.append({'file': os.path.basename(fpath), 'status': 'success', 'data': data})
+        data = results
+    else:
+        with open(args.input, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+
+    checks_requested = args.validate or args.audit or args.fidelity
+    export_requested = bool(args.output) or args.format is not None or not checks_requested
+    # Keep machine-readable exported stdout separate from check reports.
+    with redirect_stdout(sys.stderr) if export_requested else nullcontext():
+        run_checks(data, args)
+    if not export_requested:
         return
 
     # 导出
-    if args.format == 'json':
+    if (args.format or 'markdown') == 'json':
         result_str = export_json(data, args.output)
     else:
         result_str = export_markdown(data, args.output,

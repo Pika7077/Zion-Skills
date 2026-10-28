@@ -88,7 +88,10 @@ python scripts/export_output.py input.json --validate
 python scripts/export_output.py input.json --audit
 python scripts/export_output.py input.json --format markdown --output output.md
 python scripts/export_output.py input.json --format markdown --no-shot-time --output output.md
+python scripts/export_output.py input.json --validate --audit --format markdown --output output.md
 ```
+
+命令在本技能目录执行，或使用脚本的完整安装路径。验证与审计可组合，按顺序全部通过后才导出；任一失败均返回非零状态并保留已有输出。带检查参数但未指定 `--output` 或 `--format` 时只检查。显式指定格式可导出到标准输出，检查报告写到标准错误，便于管道继续读取正文。输出文件不能与任何输入文件相同。
 
 加 `--no-shot-time` 时镜行标题不含逐镜时间码，只保留整段/整组时长；逐镜时间仍在 JSON 里参与校验与配平，不作为交付内容出现。
 

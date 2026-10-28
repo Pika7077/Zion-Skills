@@ -12,12 +12,16 @@
 多会话协作时用 --target 只写自己那份：codex 写 ~/.codex/skills，
 WorkBuddy 写 ~/.workbuddy/skills，避免两边同时写同一目录。
 先在工作区修改并跑完 skill_lint.py，再执行本脚本。
+未知参数或缺失参数立即退出；全部源技能及非空入口通过检查后才开始镜像。
 """
 
+import argparse
 import filecmp
 import os
+import re
 import shutil
 import sys
+from urllib.parse import unquote, urlsplit
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 SKILLS = ["zion-assets", "zion-qa", "zion-script", "zion-storyboard"]
@@ -29,7 +33,10 @@ TARGETS = {
 
 def walk(base):
     out = {}
-    for dp, dn, fn in os.walk(base):
+    def fail(error):
+        raise error
+
+    for dp, dn, fn in os.walk(base, onerror=fail):
         dn[:] = [d for d in dn if d != "__pycache__"]
         for f in fn:
             if f.endswith((".pyc", ".pyo")):
@@ -39,31 +46,68 @@ def walk(base):
     return out
 
 
-def main():
-    if "--help" in sys.argv or "-h" in sys.argv:
-        print(__doc__)
-        return 0
-    dry = "--dry" in sys.argv
-    which = ["codex", "workbuddy"]
-    for i, a in enumerate(sys.argv):
-        if a == "--target" and i + 1 < len(sys.argv):
-            which = [sys.argv[i + 1]]
-    bad = [w for w in which if w not in TARGETS]
-    if bad:
-        print("未知目标：%s（可选 %s）" % (", ".join(bad), " / ".join(TARGETS)))
-        return 2
+def validate_source_files(base, files):
+    """Read all source files and resolve skill-local links before any writes."""
+    base = os.path.realpath(base)
+    for relative, path in files.items():
+        with open(path, 'rb') as fh:
+            content = fh.read()
+        if not relative.endswith('.md'):
+            continue
+        text = content.decode('utf-8')
+        links = re.findall(r'\]\(([^)]+)\)', text)
+        if relative == 'SKILL.md':
+            links += re.findall(r'\b(?:scripts|tests)/[\w./-]+\.(?:py|md)', text)
+        for raw in links:
+            raw = raw.strip()
+            # Markdown link titles are not part of the target path.
+            if raw.startswith('<') and '>' in raw:
+                raw = raw[1:raw.index('>')]
+            else:
+                raw = re.split(r'\s+[\'\"]', raw, maxsplit=1)[0]
+            url = urlsplit(raw)
+            if url.scheme in ('http', 'https', 'mailto') or not url.path:
+                continue
+            target = os.path.realpath(os.path.join(os.path.dirname(path), unquote(url.path)))
+            if os.path.commonpath([base, target]) != base or not os.path.isfile(target):
+                raise OSError('技能源引用缺失或越界：%s -> %s' % (path, raw))
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    parser.add_argument("--target", choices=sorted(TARGETS))
+    parser.add_argument("--dry", action="store_true", help="只报告差异，不写入")
+    args = parser.parse_args(argv)
+    dry = args.dry
+    which = [args.target] if args.target else list(TARGETS)
+
+    # Validate every source before touching any installation, including later skills.
+    sources = {}
+    try:
+        for skill in SKILLS:
+            src = os.path.join(ROOT, skill)
+            entry = os.path.join(src, "SKILL.md")
+            if not os.path.isdir(src) or not os.path.isfile(entry):
+                raise OSError("技能源缺失或不完整：%s（需要 SKILL.md）" % src)
+            with open(entry, "rb") as fh:
+                if not fh.read().strip():
+                    raise OSError("技能入口为空：%s" % entry)
+            sources[skill] = walk(src)
+            validate_source_files(src, sources[skill])
+    except (OSError, UnicodeError, ValueError) as error:
+        print("同步已停止：%s" % error, file=sys.stderr)
+        return 1
 
     added = updated = removed = 0
     for name in which:
         target = TARGETS[name]
         print("== %s (%s) ==" % (name, target))
         for skill in SKILLS:
-            src = os.path.join(ROOT, skill)
             dst = os.path.join(target, skill)
             if not os.path.isdir(dst):
                 print("  跳过（目标不存在）：%s" % dst)
                 continue
-            s, d = walk(src), walk(dst)
+            s, d = sources[skill], walk(dst)
 
             for rel, sp in sorted(s.items()):
                 dp = os.path.join(dst, rel)

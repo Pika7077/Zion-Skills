@@ -108,7 +108,11 @@ description: 从剧本、文档、视频或粗分镜中提取并制作人物、�
 ```text
 python scripts/parse_input.py <file>
 python scripts/extract_characters.py <text-file> --source-type 剧本
+python scripts/parse_input.py <file> --output parsed.json
+python scripts/extract_characters.py parsed.json --source-type 剧本
 ```
+
+命令在本技能目录执行，或把脚本位置换成安装目录中的完整路径。人物提取器自动识别解析器的文本 JSON，只读取 `text` 并继承来源；也支持 `extract_characters.py -` 从标准输入接收正文或解析结果。视频元数据、空正文和解析警告不能当作已转写文本。输出始终使用与输入不同的新文件名。
 
 批量任务逐文件保留来源，以 `extraction_id` 区分提取记录，合并前核对同名异人和异名同人；旧 `id` 只在单份结果内有效。脚本不登记稳定 `asset_id`，也不会自动完成关系推断、设计补全或视觉定稿。
 
@@ -143,4 +147,4 @@ python scripts/extract_characters.py <text-file> --source-type 剧本
 
 ## 回归资料
 
-[人物提取脚本回归](tests/test_extract_characters.py) · [人工回归清单](tests/manual-regression.md)
+[人物提取脚本回归](tests/test_extract_characters.py) · [文件解析回归](tests/test_parse_input.py) · [人工回归清单](tests/manual-regression.md)

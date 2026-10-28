@@ -6,7 +6,7 @@
 
 ## 工具的已知限制
 
-工具职责与操作流程见根目录 `AGENTS.md`。`sync_skills.py` 未匹配的参数会被静默忽略，可能退化成无参数全量同步；调用前核对 docstring，显式指定 `--target`。目标目录不存在时会跳过，不能据退出成功声称首次安装已完成。
+工具职责与操作流程见根目录 `AGENTS.md`。`sync_skills.py` 严格校验参数；源目录、技能入口、文件可读性或技能内本地引用检查失败时停止整次同步。目标目录不存在时仍会跳过，不能据退出成功声称首次安装已完成。
 
 ## 独立安装口径（2026-09-20）
 
@@ -27,7 +27,7 @@
 
 应对：写租约 + 基线快照。操作要求见 `AGENTS.md`；源文件被另一会话删除时，可从安装副本抢救后再核对。
 
-**两会话同名（都写 `workbuddy`）时**：`--owner` 无法区分谁持有——遇到「自己没领却显示被占」**不要 `--force`**，先看当日日志与 `git status`；各自计版本号会撞号，后写的一方让号并在 CHANGELOG 独立成节；**对方的当日日志会记下你的动作，是核对并发的主要线索**。
+**两个会话使用同一工具名时**：以各自的 `session_id` 区分，不能凭 `owner` 相同认领或释放租约。旧版无会话 ID 的租约迁移要求见 `AGENTS.md`。各自计版本号仍可能撞号，后写的一方让号并在 CHANGELOG 独立成节；当日日志可辅助核对并发。
 
 ## 正文 §x 引用（2026-09-21）
 
@@ -71,7 +71,7 @@ lint 不查「八种／九种」「共 N 档」这类计数。已实证真 bug�
 ## Git 与换行符
 
 - 原维护工作区使用 `main`；提交与推送条件统一见根目录 `AGENTS.md`，本档不另设收工提交要求。
-- 远端 Gitee `origin`（HTTPS）。推送需 `env -u https_proxy -u http_proxy -u HTTPS_PROXY -u HTTP_PROXY`（沙箱代理会中断传输）+ `GIT_CONFIG_NOSYSTEM=1` + `GIT_TERMINAL_PROMPT=0`；用户名填 **Gitee 用户名**，密码用私人令牌；仓库级 `http.version HTTP/1.1`。
+- 以下 Gitee 配置是原维护机的历史连接记录，不作为当前发布入口；安装与分发统一见 README 的 GitHub 仓库。原维护机远端 Gitee `origin`（HTTPS）。推送需 `env -u https_proxy -u http_proxy -u HTTPS_PROXY -u HTTP_PROXY`（沙箱代理会中断传输）+ `GIT_CONFIG_NOSYSTEM=1` + `GIT_TERMINAL_PROMPT=0`；用户名填 **Gitee 用户名**，密码用私人令牌；仓库级 `http.version HTTP/1.1`。
 - **`GIT_CONFIG_NOSYSTEM=1` 是必需的**（2026-09-22）：系统级 `etc/gitconfig` 设了 `credential.helper=helper-selector`，认证前要跑约 40 秒内部 `git config` 查询，常在传输前被超时杀掉，表现为 **push 无输出挂死**。
 - **凭据助手路径随 PortableGit 版本走**（2026-10-12 实测）：全局 `~/.gitconfig` 的 `credential.helper` 是**绝对路径**，PortableGit 由 1.2.0 升到 1.3.0 后旧路径失效，push 报 `could not read Username`。修法：`git config --global credential.helper '!<...>/versions/1.3.0/mingw64/bin/git-credential-manager.exe'`；临时可用 `-c credential.helper= -c credential.helper='!<新路径>'` 覆盖。**每次 PortableGit 升级后要复查这条**（版本号见 `.../versions/current`）。
 - **1.3.0 起 `git` 与 coreutils 已在默认 PATH**（`/mingw64/bin`、`/usr/bin`），不再需要手动 export。若报 command not found，按 `versions/current` 拼路径：`git` 在 `mingw64/bin`，`ls`／`tail`／`diff`／`wc` 在 **`usr/bin`**（两处都要加）。
